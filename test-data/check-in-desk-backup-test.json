@@ -1,0 +1,425 @@
+{
+  "app": "check-in-desk",
+  "schemaVersion": 1,
+  "exportedAt": "2026-09-02T07:30:00.000Z",
+  "data": {
+    "schemaVersion": 1,
+    "members": [
+      {
+        "id": "test-member-1",
+        "name": "佐々木 葵",
+        "externalId": "T001",
+        "group": "午前クラス",
+        "note": "",
+        "sample": false,
+        "createdAt": "2026-08-01T00:00:00.000Z"
+      },
+      {
+        "id": "test-member-2",
+        "name": "村上 健",
+        "externalId": "T002",
+        "group": "午前クラス",
+        "note": "初回参加",
+        "sample": false,
+        "createdAt": "2026-08-01T00:00:00.000Z"
+      },
+      {
+        "id": "test-member-3",
+        "name": "小川 美咲",
+        "externalId": "T003",
+        "group": "午前クラス",
+        "note": "受付で資料, 名札を渡す",
+        "sample": false,
+        "createdAt": "2026-08-01T00:00:00.000Z"
+      },
+      {
+        "id": "test-member-4",
+        "name": "山田 悠",
+        "externalId": "T004",
+        "group": "午前クラス",
+        "note": "",
+        "sample": false,
+        "createdAt": "2026-08-01T00:00:00.000Z"
+      },
+      {
+        "id": "test-member-5",
+        "name": "中島 凛",
+        "externalId": "T005",
+        "group": "午後クラス",
+        "note": "",
+        "sample": false,
+        "createdAt": "2026-08-01T00:00:00.000Z"
+      },
+      {
+        "id": "test-member-6",
+        "name": "橋本 陽菜",
+        "externalId": "T006",
+        "group": "午後クラス",
+        "note": "遅れて参加予定",
+        "sample": false,
+        "createdAt": "2026-08-01T00:00:00.000Z"
+      },
+      {
+        "id": "test-member-7",
+        "name": "前田 蓮",
+        "externalId": "T007",
+        "group": "午後クラス",
+        "note": "",
+        "sample": false,
+        "createdAt": "2026-08-01T00:00:00.000Z"
+      },
+      {
+        "id": "test-member-8",
+        "name": "藤田 結衣",
+        "externalId": "T008",
+        "group": "午後クラス",
+        "note": "",
+        "sample": false,
+        "createdAt": "2026-08-01T00:00:00.000Z"
+      },
+      {
+        "id": "test-member-9",
+        "name": "松本 翔",
+        "externalId": "T009",
+        "group": "スタッフ",
+        "note": "受付担当",
+        "sample": false,
+        "createdAt": "2026-08-01T00:00:00.000Z"
+      },
+      {
+        "id": "test-member-10",
+        "name": "井上 莉子",
+        "externalId": "T010",
+        "group": "スタッフ",
+        "note": "会場案内",
+        "sample": false,
+        "createdAt": "2026-08-01T00:00:00.000Z"
+      }
+    ],
+    "sessions": [
+      {
+        "id": "test-session-1",
+        "name": "8月定例会",
+        "mode": "checkin",
+        "targetGroup": null,
+        "startedAt": "2026-08-12T09:30:00.000Z",
+        "endedAt": "2026-08-12T10:30:00.000Z",
+        "targetMembers": [
+          {
+            "memberId": "test-member-1",
+            "name": "佐々木 葵",
+            "externalId": "T001",
+            "group": "午前クラス",
+            "isWalkIn": false
+          },
+          {
+            "memberId": "test-member-2",
+            "name": "村上 健",
+            "externalId": "T002",
+            "group": "午前クラス",
+            "isWalkIn": false
+          },
+          {
+            "memberId": "test-member-3",
+            "name": "小川 美咲",
+            "externalId": "T003",
+            "group": "午前クラス",
+            "isWalkIn": false
+          },
+          {
+            "memberId": "test-member-4",
+            "name": "山田 悠",
+            "externalId": "T004",
+            "group": "午前クラス",
+            "isWalkIn": false
+          },
+          {
+            "memberId": "test-member-5",
+            "name": "中島 凛",
+            "externalId": "T005",
+            "group": "午後クラス",
+            "isWalkIn": false
+          },
+          {
+            "memberId": "test-member-6",
+            "name": "橋本 陽菜",
+            "externalId": "T006",
+            "group": "午後クラス",
+            "isWalkIn": false
+          },
+          {
+            "memberId": "test-member-7",
+            "name": "前田 蓮",
+            "externalId": "T007",
+            "group": "午後クラス",
+            "isWalkIn": false
+          },
+          {
+            "memberId": "test-member-8",
+            "name": "藤田 結衣",
+            "externalId": "T008",
+            "group": "午後クラス",
+            "isWalkIn": false
+          },
+          {
+            "memberId": "test-member-9",
+            "name": "松本 翔",
+            "externalId": "T009",
+            "group": "スタッフ",
+            "isWalkIn": false
+          },
+          {
+            "memberId": "test-member-10",
+            "name": "井上 莉子",
+            "externalId": "T010",
+            "group": "スタッフ",
+            "isWalkIn": false
+          }
+        ],
+        "events": [
+          {
+            "id": "test-event-1-1",
+            "personId": "test-member-1",
+            "personName": "佐々木 葵",
+            "type": "checkin",
+            "at": "2026-08-12T09:35:00.000Z"
+          },
+          {
+            "id": "test-event-1-2",
+            "personId": "test-member-2",
+            "personName": "村上 健",
+            "type": "checkin",
+            "at": "2026-08-12T09:39:00.000Z"
+          },
+          {
+            "id": "test-event-1-3",
+            "personId": "test-member-3",
+            "personName": "小川 美咲",
+            "type": "checkin",
+            "at": "2026-08-12T09:43:00.000Z"
+          },
+          {
+            "id": "test-event-1-4",
+            "personId": "test-member-4",
+            "personName": "山田 悠",
+            "type": "checkin",
+            "at": "2026-08-12T09:47:00.000Z"
+          },
+          {
+            "id": "test-event-1-5",
+            "personId": "test-member-5",
+            "personName": "中島 凛",
+            "type": "checkin",
+            "at": "2026-08-12T09:51:00.000Z"
+          },
+          {
+            "id": "test-event-1-6",
+            "personId": "test-member-6",
+            "personName": "橋本 陽菜",
+            "type": "checkin",
+            "at": "2026-08-12T09:55:00.000Z"
+          },
+          {
+            "id": "test-event-1-7",
+            "personId": "test-member-9",
+            "personName": "松本 翔",
+            "type": "checkin",
+            "at": "2026-08-12T09:59:00.000Z"
+          },
+          {
+            "id": "test-event-1-8",
+            "personId": "test-member-10",
+            "personName": "井上 莉子",
+            "type": "checkin",
+            "at": "2026-08-12T10:03:00.000Z"
+          }
+        ],
+        "sample": false
+      },
+      {
+        "id": "test-session-2",
+        "name": "午前クラス",
+        "mode": "checkin",
+        "targetGroup": "午前クラス",
+        "startedAt": "2026-08-19T09:30:00.000Z",
+        "endedAt": "2026-08-19T10:20:00.000Z",
+        "targetMembers": [
+          {
+            "memberId": "test-member-1",
+            "name": "佐々木 葵",
+            "externalId": "T001",
+            "group": "午前クラス",
+            "isWalkIn": false
+          },
+          {
+            "memberId": "test-member-2",
+            "name": "村上 健",
+            "externalId": "T002",
+            "group": "午前クラス",
+            "isWalkIn": false
+          },
+          {
+            "memberId": "test-member-3",
+            "name": "小川 美咲",
+            "externalId": "T003",
+            "group": "午前クラス",
+            "isWalkIn": false
+          },
+          {
+            "memberId": "test-member-4",
+            "name": "山田 悠",
+            "externalId": "T004",
+            "group": "午前クラス",
+            "isWalkIn": false
+          }
+        ],
+        "events": [
+          {
+            "id": "test-event-2-1",
+            "personId": "test-member-1",
+            "personName": "佐々木 葵",
+            "type": "checkin",
+            "at": "2026-08-19T09:35:00.000Z"
+          },
+          {
+            "id": "test-event-2-2",
+            "personId": "test-member-3",
+            "personName": "小川 美咲",
+            "type": "checkin",
+            "at": "2026-08-19T09:39:00.000Z"
+          },
+          {
+            "id": "test-event-2-3",
+            "personId": "test-member-4",
+            "personName": "山田 悠",
+            "type": "checkin",
+            "at": "2026-08-19T09:43:00.000Z"
+          }
+        ],
+        "sample": false
+      },
+      {
+        "id": "test-session-3",
+        "name": "午後ワークショップ",
+        "mode": "entryexit",
+        "targetGroup": null,
+        "startedAt": "2026-08-26T13:00:00.000Z",
+        "endedAt": "2026-08-26T15:00:00.000Z",
+        "targetMembers": [
+          {
+            "memberId": "test-member-1",
+            "name": "佐々木 葵",
+            "externalId": "T001",
+            "group": "午前クラス",
+            "isWalkIn": false
+          },
+          {
+            "memberId": "test-member-2",
+            "name": "村上 健",
+            "externalId": "T002",
+            "group": "午前クラス",
+            "isWalkIn": false
+          },
+          {
+            "memberId": "test-member-3",
+            "name": "小川 美咲",
+            "externalId": "T003",
+            "group": "午前クラス",
+            "isWalkIn": false
+          },
+          {
+            "memberId": "test-member-4",
+            "name": "山田 悠",
+            "externalId": "T004",
+            "group": "午前クラス",
+            "isWalkIn": false
+          },
+          {
+            "memberId": "test-member-5",
+            "name": "中島 凛",
+            "externalId": "T005",
+            "group": "午後クラス",
+            "isWalkIn": false
+          },
+          {
+            "memberId": "test-member-6",
+            "name": "橋本 陽菜",
+            "externalId": "T006",
+            "group": "午後クラス",
+            "isWalkIn": false
+          },
+          {
+            "memberId": "test-member-7",
+            "name": "前田 蓮",
+            "externalId": "T007",
+            "group": "午後クラス",
+            "isWalkIn": false
+          },
+          {
+            "memberId": "test-member-8",
+            "name": "藤田 結衣",
+            "externalId": "T008",
+            "group": "午後クラス",
+            "isWalkIn": false
+          },
+          {
+            "id": "test-walkin-1",
+            "memberId": null,
+            "name": "当日参加 サンプル",
+            "externalId": "",
+            "group": "",
+            "isWalkIn": true
+          }
+        ],
+        "events": [
+          {
+            "id": "test-event-3-1",
+            "personId": "test-member-1",
+            "personName": "佐々木 葵",
+            "type": "enter",
+            "at": "2026-08-26T13:05:00.000Z"
+          },
+          {
+            "id": "test-event-3-2",
+            "personId": "test-member-2",
+            "personName": "村上 健",
+            "type": "enter",
+            "at": "2026-08-26T13:08:00.000Z"
+          },
+          {
+            "id": "test-event-3-3",
+            "personId": "test-member-5",
+            "personName": "中島 凛",
+            "type": "enter",
+            "at": "2026-08-26T13:11:00.000Z"
+          },
+          {
+            "id": "test-event-3-4",
+            "personId": "test-member-6",
+            "personName": "橋本 陽菜",
+            "type": "enter",
+            "at": "2026-08-26T13:14:00.000Z"
+          },
+          {
+            "id": "test-event-3-5",
+            "personId": "test-member-1",
+            "personName": "佐々木 葵",
+            "type": "exit",
+            "at": "2026-08-26T14:10:00.000Z"
+          },
+          {
+            "id": "test-event-3-6",
+            "personId": "test-walkin-1",
+            "personName": "当日参加 サンプル",
+            "type": "enter",
+            "at": "2026-08-26T13:20:00.000Z"
+          }
+        ],
+        "sample": false
+      }
+    ],
+    "activeSessionId": null,
+    "sampleDismissed": true,
+    "updatedAt": "2026-09-02T07:30:00.000Z"
+  }
+}

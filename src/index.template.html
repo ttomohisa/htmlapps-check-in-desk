@@ -1,0 +1,1427 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#f5f5f2">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: blob:; script-src 'self' 'unsafe-inline' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data: blob:; media-src 'self' data: blob:; worker-src 'self' blob:; connect-src 'none'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>Check-in Desk</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%2316624F'/%3E%3Cpath d='M19 18h26v30H19z' fill='none' stroke='white' stroke-width='4' stroke-linejoin='round'/%3E%3Cpath d='M25 14v8M39 14v8M25 31l5 5 10-11M25 43h14' fill='none' stroke='white' stroke-width='4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f5f5f2;
+      --surface: #ffffff;
+      --surface-muted: #f0f0ed;
+      --surface-hover: #e9e9e5;
+      --text: #20211f;
+      --muted: #666963;
+      --line: #dadbd6;
+      --line-strong: #bfc1ba;
+      --accent: #16624f;
+      --accent-hover: #0e503f;
+      --accent-soft: #e1f0ea;
+      --danger: #b3261e;
+      --focus: #4d8bc7;
+      --shadow-sm: 0 1px 2px rgba(25, 28, 24, .08), 0 1px 6px rgba(25, 28, 24, .04);
+      --shadow-md: 0 12px 34px rgba(25, 28, 24, .10);
+      --radius: 12px;
+      --header-height: 66px;
+    }
+    * { box-sizing: border-box; }
+    html { min-height: 100%; background: var(--bg); scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans JP", "Yu Gothic UI", "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
+      font-size: 15px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+    button, textarea, input, select { font: inherit; }
+    button { color: inherit; }
+    button:focus-visible, textarea:focus-visible, input:focus-visible, select:focus-visible, summary:focus-visible {
+      outline: 3px solid color-mix(in srgb, var(--focus) 55%, transparent);
+      outline-offset: 2px;
+    }
+    .app-header {
+      position: sticky;
+      z-index: 30;
+      top: 0;
+      min-height: var(--header-height);
+      border-bottom: 1px solid color-mix(in srgb, var(--line) 82%, transparent);
+      background: color-mix(in srgb, var(--bg) 92%, transparent);
+      backdrop-filter: blur(16px) saturate(1.2);
+    }
+    .header-inner {
+      width: min(1180px, 100%);
+      min-height: var(--header-height);
+      margin: 0 auto;
+      padding: 10px clamp(14px, 2.8vw, 30px);
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
+    .brand-mark {
+      display: grid;
+      place-items: center;
+      width: 38px;
+      height: 38px;
+      flex: 0 0 auto;
+      border-radius: 11px;
+      background: var(--accent);
+      color: #fff;
+      box-shadow: var(--shadow-sm);
+    }
+    .brand-mark svg { width: 20px; height: 20px; display: block; }
+    .brand-copy { min-width: 0; }
+    .brand-name {
+      margin: 0;
+      font-size: 17px;
+      line-height: 1.2;
+      letter-spacing: .01em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .version-badge {
+      display: inline-flex;
+      align-items: center;
+      margin-left: 7px;
+      padding: 1px 6px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--muted);
+      background: var(--surface-muted);
+      font-size: 10px;
+      font-weight: 650;
+      vertical-align: 2px;
+    }
+    .brand-meta {
+      margin: 2px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .header-actions { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+    .button {
+      border: 1px solid var(--line);
+      background: var(--surface);
+      border-radius: 10px;
+      cursor: pointer;
+      transition: border-color .16s ease, background .16s ease, transform .16s ease;
+    }
+    .button:hover { border-color: var(--line-strong); background: var(--surface-hover); }
+    .button:active { transform: translateY(1px); }
+    .language-button {
+      min-width: 0;
+      padding: 5px 1px;
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 750;
+      letter-spacing: .02em;
+      cursor: pointer;
+      transition: color .16s ease, opacity .16s ease;
+    }
+    .language-button:hover { color: var(--text); }
+    .language-button:active { opacity: .65; }
+    .icon-button {
+      display: inline-grid;
+      place-items: center;
+      width: 38px;
+      height: 38px;
+      padding: 0;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--surface);
+      cursor: pointer;
+      transition: border-color .16s ease, background .16s ease, transform .16s ease;
+    }
+    .icon-button:hover { border-color: var(--line-strong); background: var(--surface-hover); }
+    .icon-button:active { transform: translateY(1px); }
+    .icon-button svg { width: 18px; height: 18px; display: block; }
+    .header-icon-button {
+      width: auto;
+      height: auto;
+      padding: 5px 1px;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      color: var(--muted);
+      transition: color .16s ease, opacity .16s ease;
+    }
+    .header-icon-button:hover { border-color: transparent; background: transparent; color: var(--text); }
+    .header-icon-button:active { transform: none; opacity: .65; }
+    .header-icon-button svg { width: 20px; height: 20px; }
+    .toolbar-info-button { display:inline-grid; place-items:center; width:34px; height:34px; flex:0 0 auto; padding:0; border:0; border-radius:9px; background:transparent; color:var(--muted); cursor:pointer; transition:color .16s ease,background .16s ease; }
+    .toolbar-info-button:hover { color:var(--accent); background:var(--accent-soft); }
+    .toolbar-info-button.csv-format-info:hover { color:var(--muted); background:transparent; }
+    .toolbar-info-button:active { opacity:.72; }
+    .toolbar-info-button svg { width:18px; height:18px; display:block; }
+    .main {
+      width: min(1180px, 100%);
+      margin: 0 auto;
+      padding: 22px clamp(14px, 2.8vw, 30px) 54px;
+    }
+    .page-intro {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 0 2px 18px;
+    }
+    .page-intro h2 {
+      margin: 0;
+      font-size: clamp(21px, 3vw, 26px);
+      line-height: 1.3;
+      letter-spacing: -.025em;
+    }
+    .page-intro p { margin: 5px 0 0; max-width: 760px; color: var(--muted); font-size: 13px; }
+    .local-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      flex: 0 0 auto;
+      margin-top: 3px;
+      padding: 7px 10px;
+      border: 1px solid color-mix(in srgb, var(--accent) 24%, var(--line));
+      border-radius: 999px;
+      color: var(--accent);
+      background: var(--accent-soft);
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .local-badge svg { width: 15px; height: 15px; display: block; }
+    .sample-data-banner { display:flex; align-items:center; gap:10px; margin:0 0 16px; padding:10px 11px; border:1px solid color-mix(in srgb,var(--accent) 24%,var(--line)); border-radius:12px; background:color-mix(in srgb,var(--accent-soft) 68%,#fff); }
+    .sample-data-banner[hidden] { display:none !important; }
+    .sample-data-banner-icon { display:grid; place-items:center; flex:0 0 auto; width:32px; height:32px; border-radius:9px; background:#fff; color:var(--accent); box-shadow:0 1px 3px rgba(20,22,20,.06); }
+    .sample-data-banner-icon svg { width:18px; height:18px; }
+    .sample-data-banner-copy { flex:1; min-width:0; }
+    .sample-data-banner-copy strong { display:block; font-size:12px; line-height:1.35; }
+    .sample-data-banner-copy span { display:block; margin-top:2px; color:var(--muted); font-size:10.5px; line-height:1.45; }
+    .sample-data-banner .button { flex:0 0 auto; white-space:nowrap; background:#fff; }
+    .workspace {
+      margin: 0 0 28px;
+      padding: 20px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--surface);
+      box-shadow: var(--shadow-sm);
+    }
+    .workspace-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 18px; margin-bottom: 15px; }
+    .workspace h2, .section-title { margin: 0; letter-spacing: -.02em; }
+    .workspace h2 { font-size: 19px; }
+    .workspace-head p { margin: 4px 0 0; color: var(--muted); font-size: 13px; }
+    .stats { display: flex; flex-wrap: wrap; gap: 7px; }
+    .stat { min-width: 70px; padding: 7px 10px; border-radius: 10px; background: var(--surface-muted); text-align: center; }
+    .stat-value { display: block; font-size: 15px; font-weight: 780; line-height: 1.2; }
+    .stat-label { color: var(--muted); font-size: 10px; }
+    textarea {
+      width: 100%;
+      min-height: 260px;
+      resize: vertical;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 16px;
+      background: #fbfbf9;
+      color: var(--text);
+      line-height: 1.7;
+    }
+    textarea:hover { border-color: var(--line-strong); }
+    .toolbar { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; margin-top: 12px; }
+    .button-row { display: flex; flex-wrap: wrap; gap: 8px; }
+    .button { min-height: 40px; padding: 8px 14px; font-weight: 700; }
+    .button.primary { border-color: var(--accent); color: white; background: var(--accent); }
+    .button.primary:hover { border-color: var(--accent-hover); background: var(--accent-hover); }
+    .button.danger { color: var(--danger); }
+    .save-status { align-self: center; color: var(--muted); font-size: 12px; }
+    .export-row { display: flex; align-items: end; gap: 10px; margin-top: 12px; }
+    .export-field { display: grid; gap: 5px; min-width: min(100%, 320px); }
+    .export-label { color: var(--muted); font-size: 11px; font-weight: 700; }
+    .filename-control { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; overflow: hidden; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+    .filename-control:focus-within { border-color: var(--focus); box-shadow: 0 0 0 3px color-mix(in srgb, var(--focus) 20%, transparent); }
+    .filename-input { width: 100%; min-width: 0; min-height: 40px; padding: 8px 10px; border: 0; outline: 0; background: transparent; color: var(--text); }
+    .filename-extension { padding: 0 10px; color: var(--muted); font-size: 12px; user-select: none; }
+    .section { padding: 26px 0; }
+    .section-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 18px; margin-bottom: 15px; }
+    .section-title { font-size: 20px; }
+    .section-head p { margin: 0; color: var(--muted); font-size: 13px; }
+    .card-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+    .card { min-height: 150px; padding: 17px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); box-shadow: var(--shadow-sm); }
+    .card-number { color: var(--accent); font-size: 11px; font-weight: 800; letter-spacing: .08em; }
+    .card h3 { margin: 17px 0 6px; font-size: 15px; }
+    .card p { margin: 0; color: var(--muted); font-size: 12px; }
+    details { border: 1px solid var(--line); border-radius: 12px; background: var(--surface); overflow: hidden; box-shadow: var(--shadow-sm); }
+    summary { cursor: pointer; padding: 14px 16px; font-weight: 720; }
+    .build-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 0 16px 16px; }
+    .build-item { padding: 11px; border-radius: 10px; background: var(--surface-muted); }
+    .build-item span { display: block; color: var(--muted); font-size: 10px; }
+    .build-item strong { display: block; overflow-wrap: anywhere; font-size: 12px; }
+    footer { width: min(1180px, 100%); margin: 0 auto; padding: 0 clamp(14px, 2.8vw, 30px) 34px; color: var(--muted); font-size: 12px; }
+    /* Reusable toast / Undo component. Canonical source: components/toast.html */
+    .app-toast {
+      position: fixed; right: 18px; bottom: calc(18px + env(safe-area-inset-bottom)); z-index: 60;
+      display: flex; align-items: center; gap: 12px; max-width: min(420px, calc(100vw - 36px));
+      padding: 10px 12px 10px 14px; border: 1px solid var(--line); border-radius: 12px;
+      background: var(--surface); color: var(--text); box-shadow: var(--shadow-md); opacity: 0;
+      transform: translateY(12px); pointer-events: none; transition: opacity .18s ease, transform .18s ease;
+    }
+    .app-toast.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
+    .app-toast[data-tone="success"] { border-color: color-mix(in srgb, var(--accent) 34%, var(--line)); }
+    .app-toast[data-tone="warning"] { border-color: #c58a24; }
+    .app-toast-message { min-width: 0; flex: 1 1 auto; font-size: 13px; line-height: 1.45; overflow-wrap: anywhere; }
+    .app-toast-action { flex: 0 0 auto; min-height: 34px; padding: 5px 8px; border: 0; border-radius: 8px; background: transparent; color: var(--accent); font: inherit; font-size: 12px; font-weight: 800; cursor: pointer; }
+    .app-toast-action:hover { background: var(--surface-hover); }
+    .app-toast-action[hidden] { display: none; }
+    dialog {
+      width: min(640px, calc(100% - 28px));
+      max-height: min(760px, calc(100dvh - 28px));
+      padding: 0;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--surface);
+      color: var(--text);
+      box-shadow: var(--shadow-md);
+    }
+    dialog[open] { display: flex; flex-direction: column; }
+    dialog:not([open]) { display: none; }
+    #helpDialog { height: min(760px, calc(100dvh - 28px)); }
+    dialog::backdrop { background: rgba(15, 17, 14, .52); backdrop-filter: blur(4px); }
+    .dialog-header {
+      flex: 0 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 16px 18px;
+      border-bottom: 1px solid var(--line);
+    }
+    .dialog-header h2 { margin: 0; font-size: 17px; }
+    .dialog-body { flex: 1 1 auto; min-height: 0; padding: 20px 20px 28px; overflow-y: auto; overscroll-behavior: contain; }
+    .dialog-body h3 {
+      margin: 25px 0 8px;
+      padding-top: 19px;
+      border-top: 1px solid color-mix(in srgb, var(--line) 78%, transparent);
+      font-size: 14px;
+    }
+    .dialog-body h3:first-child { margin-top: 0; padding-top: 0; border-top: 0; }
+    .dialog-body p, .dialog-body li { color: var(--muted); font-size: 13px; line-height: 1.7; }
+    .dialog-body p { margin: 8px 0 0; }
+    .dialog-body ul, .dialog-body ol { margin: 8px 0 0; padding-left: 22px; }
+    .dialog-body li + li { margin-top: 7px; }
+    .dialog-note {
+      margin-top: 12px;
+      padding: 11px 12px;
+      border: 1px solid color-mix(in srgb, var(--accent) 22%, var(--line));
+      border-radius: 10px;
+      background: var(--accent-soft);
+      color: var(--text) !important;
+    }
+
+    /* Reusable confirmation component. Canonical source: components/confirm-dialog.html */
+    .app-confirm-dialog { width: min(420px, calc(100% - 24px)); max-width: 100%; }
+    .app-confirm-dialog::backdrop { background: rgba(15, 17, 14, .48); backdrop-filter: blur(3px); }
+    .app-confirm-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 15px 18px 13px;
+      border-bottom: 1px solid var(--line);
+    }
+    .app-confirm-title { margin: 0; font-size: 17px; letter-spacing: -.01em; }
+    .app-confirm-close {
+      display: grid;
+      place-items: center;
+      width: 36px;
+      height: 36px;
+      padding: 0;
+      border: 0;
+      border-radius: 10px;
+      background: transparent;
+      color: var(--text);
+      cursor: pointer;
+    }
+    .app-confirm-close:hover { background: var(--surface-hover); }
+    .app-confirm-close svg { width: 19px; height: 19px; }
+    .app-confirm-body { padding: 18px; }
+    .app-confirm-message {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.7;
+      overflow-wrap: anywhere;
+    }
+    .app-confirm-actions {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 18px;
+    }
+    .app-confirm-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      padding: 8px 12px;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      background: var(--surface);
+      color: var(--text);
+      font: inherit;
+      font-size: 12px;
+      font-weight: 760;
+      cursor: pointer;
+    }
+    .app-confirm-button:hover { border-color: var(--line-strong); background: var(--surface-hover); }
+    .app-confirm-button.primary { border-color: var(--accent); background: var(--accent); color: #fff; }
+    .app-confirm-button.primary:hover { border-color: var(--accent-hover); background: var(--accent-hover); }
+    .app-confirm-button.danger { border-color: var(--danger); background: var(--danger); color: #fff; }
+    .app-confirm-button:focus-visible, .app-confirm-close:focus-visible {
+      outline: 3px solid color-mix(in srgb, var(--focus) 55%, transparent);
+      outline-offset: 2px;
+    }
+
+    code { padding: 1px 5px; border-radius: 5px; background: var(--surface-muted); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .92em; }
+    .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+    @media (max-width: 820px) {
+      .page-intro { align-items: stretch; flex-direction: column; gap: 10px; }
+      .local-badge { align-self: flex-start; }
+      .workspace-head, .section-head { align-items: stretch; flex-direction: column; }
+      .card-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .build-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 520px) {
+      :root { --header-height: 58px; }
+      .header-inner { padding-block: 8px; }
+      .brand-mark { width: 34px; height: 34px; border-radius: 10px; }
+      .brand-name { font-size: 15px; }
+      .brand-meta { display: none; }
+      .header-actions { gap: 11px; }
+      .language-button { padding-block: 6px; }
+      .header-icon-button { padding-block: 6px; }
+      .main { padding-top: 18px; }
+      .page-intro { padding-bottom: 14px; }
+      .workspace { padding: 14px; border-radius: 14px; }
+      .stats { width: 100%; }
+      .stat { flex: 1 1 0; min-width: 0; }
+      .card-grid { grid-template-columns: 1fr; }
+      .toolbar, .button-row { width: 100%; }
+      .button-row .button { flex: 1 1 auto; }
+      .export-row, .export-field { width: 100%; }
+      .app-toast { left: 12px; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom)); max-width: none; }
+      textarea { min-height: 235px; }
+      .app-confirm-dialog {
+        width: 100%;
+        max-width: none;
+        margin: auto 0 0;
+        border-width: 1px 0 0;
+        border-radius: 22px 22px 0 0;
+      }
+      .app-confirm-dialog::backdrop { background: rgba(0, 0, 0, .42); backdrop-filter: blur(2px); }
+      .app-confirm-header { padding: 14px 18px 12px; }
+      .app-confirm-body { padding: 12px 18px calc(env(safe-area-inset-bottom) + 18px); }
+      .app-confirm-message { font-size: 14px; line-height: 1.75; }
+      .app-confirm-actions { grid-template-columns: 1fr; gap: 10px; margin-top: 16px; }
+      .app-confirm-button { min-height: 48px; font-size: 14px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
+    }
+  
+
+    /* APP:BEGIN Check-in Desk */
+    body.has-mobile-bottom-bar { min-width: 0; }
+    .main { padding-bottom: 110px; }
+    .page-intro { align-items: center; }
+    .page-intro p { max-width: 700px; }
+    .app-grid { display: grid; gap: 16px; }
+    .panel {
+      border: 1px solid var(--line); border-radius: 16px; background: var(--surface);
+      box-shadow: var(--shadow-sm); overflow: hidden;
+    }
+    .panel-head {
+      display: flex; align-items: flex-start; justify-content: space-between; gap: 14px;
+      padding: 18px 18px 14px; border-bottom: 1px solid var(--line);
+    }
+    .panel-head.compact { padding-bottom: 12px; }
+    .panel-title { margin: 0; font-size: 18px; letter-spacing: -.02em; }
+    .panel-subtitle { margin: 4px 0 0; color: var(--muted); font-size: 12px; }
+    .panel-body { padding: 18px; }
+    .panel-body.flush { padding: 0; }
+    .section-kicker { margin: 0 0 6px; color: var(--accent); font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
+    .metric-grid { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 9px; }
+    .metric { min-width: 0; padding: 13px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface-muted); }
+    .metric strong { display: block; font-size: 22px; line-height: 1.1; letter-spacing: -.03em; }
+    .metric span { display: block; margin-top: 4px; color: var(--muted); font-size: 11px; }
+    .empty-state { padding: 38px 22px; text-align: center; }
+    .empty-icon { display: grid; place-items: center; width: 58px; height: 58px; margin: 0 auto 14px; border-radius: 18px; background: var(--accent-soft); color: var(--accent); }
+    .empty-icon svg { width: 28px; height: 28px; }
+    .empty-state h3 { margin: 0; font-size: 18px; }
+    .empty-state p { max-width: 520px; margin: 7px auto 18px; color: var(--muted); font-size: 13px; }
+    .empty-state .empty-action { margin-top: 14px; }
+    .button { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 40px; padding: 8px 13px; font-weight: 720; }
+    .button svg { width: 17px; height: 17px; flex: 0 0 auto; }
+    .button.primary { border-color: var(--accent); background: var(--accent); color: white; }
+    .button.primary:hover { border-color: var(--accent-hover); background: var(--accent-hover); }
+    .button.soft { border-color: color-mix(in srgb, var(--accent) 22%, var(--line)); background: var(--accent-soft); color: var(--accent); }
+    .button.danger { color: var(--danger); }
+    .button.small { min-height: 34px; padding: 5px 9px; font-size: 12px; }
+    .button:disabled { opacity: .45; cursor: default; transform: none; }
+    .button-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    .toolbar-line { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; }
+    .toolbar-line + .toolbar-line { margin-top: 12px; }
+    .search-wrap { position: relative; flex: 1 1 260px; min-width: 0; }
+    .search-wrap svg { position: absolute; left: 11px; top: 50%; width: 17px; height: 17px; color: var(--muted); transform: translateY(-50%); pointer-events: none; }
+    .search-input, .field-input, .field-select, .field-textarea {
+      width: 100%; min-height: 42px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 10px;
+      background: #fbfbf9; color: var(--text); outline: 0;
+    }
+    .search-input { padding-left: 36px; }
+    .field-textarea { min-height: 88px; resize: vertical; }
+    .search-input:focus, .field-input:focus, .field-select:focus, .field-textarea:focus { border-color: var(--focus); box-shadow: 0 0 0 3px color-mix(in srgb, var(--focus) 18%, transparent); }
+    .field-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; }
+    .field { display: grid; gap: 5px; min-width: 0; }
+    .field.full { grid-column: 1 / -1; }
+    .field-label { color: var(--muted); font-size: 11px; font-weight: 750; }
+    .field-help { margin: 0; color: var(--muted); font-size: 11px; }
+    .segmented { display: inline-flex; max-width: 100%; padding: 3px; gap: 3px; border: 1px solid var(--line); border-radius: 11px; background: var(--surface-muted); overflow-x: auto; }
+    .segment { min-height: 34px; padding: 5px 10px; border: 0; border-radius: 8px; background: transparent; color: var(--muted); font: inherit; font-size: 12px; font-weight: 760; cursor: pointer; white-space: nowrap; }
+    .segment.is-active { background: var(--surface); color: var(--accent); box-shadow: var(--shadow-sm); }
+    .count-pill { display: inline-flex; align-items: center; justify-content: center; min-width: 24px; height: 22px; padding: 0 7px; border-radius: 999px; background: var(--surface-muted); color: var(--muted); font-size: 11px; font-weight: 760; }
+    .segment.is-active .count-pill { background: var(--accent-soft); color: var(--accent); }
+    .session-banner { padding: 15px 18px; background: linear-gradient(135deg, var(--accent-soft), #f7fbf9); border-bottom: 1px solid color-mix(in srgb, var(--accent) 18%, var(--line)); }
+    .session-banner-main { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+    .session-banner h3 { margin: 0; font-size: 18px; }
+    .session-title-line { display:flex; align-items:center; gap:7px; min-width:0; }
+    .session-title-line h3 { min-width:0; overflow-wrap:anywhere; }
+    .session-title-edit { width:32px; height:32px; flex:0 0 auto; }
+    .session-meta { display: flex; flex-wrap: wrap; gap: 7px 12px; margin-top: 5px; color: var(--muted); font-size: 11px; }
+    .status-dot { display: inline-block; width: 8px; height: 8px; margin-right: 5px; border-radius: 50%; background: var(--accent); }
+    .reception-layout { display: grid; grid-template-columns: minmax(0,1fr) 300px; gap: 16px; align-items: start; }
+    .member-list { display: grid; gap: 1px; background: var(--line); }
+    .member-row { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 12px; align-items: center; padding: 12px 15px; background: var(--surface); }
+    .member-row:hover { background: #fcfcfa; }
+    .member-main { min-width: 0; }
+    .member-name-line { display: flex; align-items: center; gap: 8px; min-width: 0; }
+    .member-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 760; }
+    .member-meta { display: flex; flex-wrap: wrap; gap: 4px 9px; margin-top: 3px; color: var(--muted); font-size: 11px; }
+    .tag { display: inline-flex; align-items: center; max-width: 160px; min-height: 20px; padding: 1px 7px; border-radius: 999px; background: var(--surface-muted); color: var(--muted); font-size: 10px; font-weight: 740; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .tag.success { background: var(--accent-soft); color: var(--accent); }
+    .tag.walkin { background: #fff4dc; color: #825b12; }
+    .check-action { min-width: 92px; }
+    .checked-time { color: var(--accent); font-size: 11px; font-weight: 760; }
+    .recent-list { display: grid; gap: 8px; }
+    .recent-item { display: grid; grid-template-columns: auto minmax(0,1fr) auto; gap: 10px; align-items: center; padding: 9px 0; border-bottom: 1px solid var(--line); }
+    .recent-item:last-child { border-bottom: 0; }
+    .recent-time { min-width: 48px; color: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; }
+    .recent-copy strong { display: block; font-size: 12px; }
+    .recent-copy span { color: var(--muted); font-size: 11px; }
+    .recent-action { min-width: 58px; justify-self: end; }
+    .recent-person-button { width: 100%; min-width: 0; padding: 3px 4px; margin: -3px -4px; border: 0; border-radius: 7px; background: transparent; color: inherit; text-align: left; cursor: pointer; }
+    .recent-person-button:hover { background: var(--surface-muted); }
+    .recent-status { display: inline-flex; margin-left: 5px; color: var(--accent); font-size: 10px; font-weight: 760; }
+    .reception-search-tools { display: grid; grid-template-columns: minmax(0,1fr) minmax(160px,220px); gap: 9px; width: 100%; align-items: start; }
+    .reception-search-stack { min-width: 0; }
+    .search-hint { min-height: 18px; margin-top: 5px; padding-left: 2px; color: var(--muted); font-size: 10.5px; }
+    .search-hint.is-ready { color: var(--accent); font-weight: 720; }
+    .focus-session-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 7px; }
+    .focus-exit-button { display: none; }
+    body.reception-focus .focus-exit-button { display: inline-flex; }
+    body.reception-focus .page-intro,
+    body.reception-focus #sampleDataBanner,
+    body.reception-focus .desktop-tabs,
+    body.reception-focus #recentSessionsPanel,
+    body.reception-focus footer,
+    body.reception-focus .app-mobile-bottom-bar { display: none !important; }
+    body.reception-focus.has-mobile-bottom-bar { padding-bottom: 0; }
+    body.reception-focus .main { width: min(1160px,100%); padding-top: 14px; padding-bottom: 28px; }
+    body.reception-focus #receptionPage { display: block !important; }
+    body.reception-focus .reception-focus-start { display: none !important; }
+    body.reception-focus .app-toast { bottom: calc(12px + env(safe-area-inset-bottom)); }
+    .person-history-status { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+    .csv-preview-summary { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 8px; margin-bottom: 14px; }
+    .csv-preview-stat { padding: 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface-muted); }
+    .csv-preview-stat strong { display: block; font-size: 18px; }
+    .csv-preview-stat span { display: block; margin-top: 2px; color: var(--muted); font-size: 10px; }
+    .csv-preview-list { max-height: 260px; overflow: auto; border: 1px solid var(--line); border-radius: 10px; }
+    .csv-preview-row { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 8px; align-items: center; padding: 9px 10px; border-bottom: 1px solid var(--line); }
+    .csv-preview-row:last-child { border-bottom: 0; }
+    .csv-preview-row strong { display: block; font-size: 12px; overflow-wrap: anywhere; }
+    .csv-preview-row span { display: block; margin-top: 2px; color: var(--muted); font-size: 10px; overflow-wrap: anywhere; }
+    .csv-preview-more { padding: 9px 10px; color: var(--muted); font-size: 10px; text-align: center; background: var(--surface-muted); }
+    .activity-log { display: grid; gap: 6px; margin-top: 8px; }
+    .activity-log-row { display: grid; grid-template-columns: 88px minmax(0,1fr); gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--line); }
+    .activity-log-row:last-child { border-bottom: 0; }
+    .activity-log-time { color: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; }
+    .activity-log-copy strong { display: block; font-size: 12px; }
+    .activity-log-copy span { color: var(--muted); font-size: 11px; }
+    .roster-table { width: 100%; border-collapse: collapse; }
+    .roster-table th, .roster-table td { padding: 10px 12px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: middle; font-size: 12px; }
+    .roster-table th { color: var(--muted); background: var(--surface-muted); font-size: 10px; letter-spacing: .04em; }
+    .roster-table tr:last-child td { border-bottom: 0; }
+    .roster-actions { display: flex; justify-content: flex-end; gap: 5px; }
+    .icon-mini { width: 34px; height: 34px; padding: 0; }
+    .icon-mini svg { width: 16px; height: 16px; }
+    .session-list { display: grid; gap: 10px; }
+    .session-card { padding: 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+    .session-card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+    .session-card-actions { display: flex; align-items: center; gap: 6px; flex: 0 0 auto; }
+    .session-card h3 { margin: 0; font-size: 14px; }
+    .session-card p { margin: 4px 0 0; color: var(--muted); font-size: 11px; }
+    .session-progress { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+    .progress-track { height: 7px; flex: 1 1 auto; overflow: hidden; border-radius: 999px; background: var(--surface-muted); }
+    .progress-fill { height: 100%; border-radius: inherit; background: var(--accent); }
+    .session-progress strong { min-width: 48px; text-align: right; font-size: 11px; }
+    .matrix-scroll { overflow: auto; max-width: 100%; }
+    .matrix { width: 100%; min-width: 560px; border-collapse: separate; border-spacing: 0; font-size: 11px; }
+    .matrix th, .matrix td { padding: 8px 9px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); text-align: center; white-space: nowrap; }
+    .matrix th { position: sticky; top: 0; z-index: 2; background: var(--surface-muted); color: var(--muted); font-size: 10px; }
+    .matrix th:first-child, .matrix td:first-child { position: sticky; left: 0; z-index: 1; text-align: left; background: var(--surface); }
+    .matrix th:first-child { z-index: 3; background: var(--surface-muted); }
+    .matrix .present { color: var(--accent); font-weight: 850; }
+    .matrix .absent { color: #a75245; font-weight: 700; }
+    .data-actions { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; }
+    .data-card { padding: 15px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+    .data-card h3 { margin: 0; font-size: 14px; }
+    .data-card p { margin: 5px 0 12px; color: var(--muted); font-size: 11px; }
+    .desktop-tabs { display: flex; gap: 5px; margin-bottom: 14px; padding: 4px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface-muted); }
+    .desktop-tab { flex: 1 1 0; min-height: 38px; border: 0; border-radius: 9px; background: transparent; color: var(--muted); font: inherit; font-size: 12px; font-weight: 760; cursor: pointer; }
+    .desktop-tab.is-active { background: var(--surface); color: var(--accent); box-shadow: var(--shadow-sm); }
+    .app-mobile-page { display: none; }
+    .app-mobile-page.is-active-desktop { display: block; }
+    .app-mobile-bottom-bar { display: none; }
+    .dialog-form { display: grid; gap: 13px; }
+    .dialog-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 18px; }
+    .checkbox-line { display: flex; align-items: flex-start; gap: 9px; }
+    .checkbox-line input { margin-top: 3px; accent-color: var(--accent); }
+    .checkbox-line label { color: var(--muted); font-size: 12px; }
+    .inline-note { padding: 10px 11px; border-radius: 10px; background: var(--surface-muted); color: var(--muted); font-size: 11px; }
+    .storage-warning { margin-bottom:14px; padding:11px 12px; border:1px solid #d4a43b; border-radius:11px; background:#fff8e8; color:#6f5010; font-size:12px; line-height:1.55; }
+    .hidden { display: none !important; }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+    .app-mobile-bottom-bar { --app-mobile-bottom-items: 4; }
+    @media (max-width: 820px) {
+      .reception-layout { grid-template-columns: 1fr; }
+      .session-card-head { align-items:stretch; }
+      .session-card-actions { flex-wrap:wrap; justify-content:flex-end; }
+      .metric-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+      .data-actions { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 600px) {
+      :root { --app-mobile-bottom-bar-height: 72px; }
+      body.has-mobile-bottom-bar { padding-bottom: calc(var(--app-mobile-bottom-bar-height) + env(safe-area-inset-bottom)); }
+      .main { padding: 14px 12px 24px; }
+      .page-intro { padding: 0 2px 12px; }
+      .page-intro p { font-size: 12px; }
+      .local-badge { display: none; }
+      .desktop-tabs { display: none; }
+      .app-mobile-page { display: none !important; }
+      .app-mobile-page.is-mobile-active { display: block !important; }
+      .panel { border-radius: 14px; }
+      .panel-head { padding: 15px 14px 12px; }
+      .panel-body { padding: 14px; }
+      .session-banner { padding: 13px 14px; }
+      .session-banner-main { align-items: flex-start; flex-direction: column; }
+      .metric { padding: 11px; }
+      .metric strong { font-size: 20px; }
+      .member-row { padding: 11px 12px; gap: 8px; }
+      .member-meta { gap: 3px 7px; }
+      .check-action { min-width: 80px; min-height: 44px; }
+      .reception-search-tools { grid-template-columns: 1fr; }
+      .reception-search-tools .field-select { min-height: 44px; }
+      .focus-session-actions { width: 100%; justify-content: stretch; }
+      .focus-exit-button { width: 38px; min-width: 38px; padding: 0; }
+      .focus-exit-button span { display: none; }
+      .focus-session-actions .button { flex: 1 1 auto; }
+      .csv-preview-summary { grid-template-columns: 1fr 1fr 1fr; gap: 6px; }
+      .csv-preview-stat { padding: 8px; }
+      .csv-preview-stat strong { font-size: 16px; }
+      .roster-table, .roster-table tbody { display: block; }
+      .roster-table thead { display: none; }
+      .roster-table tr { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 8px; align-items: center; padding: 11px 12px; border-bottom: 1px solid var(--line); }
+      .roster-table td { display: block; padding: 0; border: 0; }
+      .roster-table td:nth-child(2), .roster-table td:nth-child(3), .roster-table td:nth-child(4) { grid-column: 1; color: var(--muted); font-size: 11px; }
+      .roster-table td:last-child { grid-column: 2; grid-row: 1 / span 4; align-self: center; }
+      .sample-data-banner { align-items:flex-start; flex-wrap:wrap; }
+      .sample-data-banner-copy { min-width:calc(100% - 44px); }
+      .sample-data-banner .button { width:100%; }
+      .field-grid { grid-template-columns: 1fr; }
+      .field.full { grid-column: auto; }
+      dialog.app-form-dialog { width: 100%; max-width: none; margin: auto 0 0; border-width: 1px 0 0; border-radius: 22px 22px 0 0; }
+      .app-mobile-bottom-bar {
+        position: fixed; z-index: 80; left: 0; right: 0; bottom: 0; display: grid;
+        grid-template-columns: repeat(4,minmax(0,1fr)); gap: 4px;
+        padding: 6px 9px calc(6px + env(safe-area-inset-bottom)); border-top: 1px solid var(--line);
+        background: rgba(255,255,255,.95); box-shadow: 0 -8px 24px rgba(20,22,20,.06); backdrop-filter: blur(18px) saturate(1.35);
+      }
+      .app-mobile-bottom-item {
+        min-width: 0; min-height: 52px; padding: 4px; border: 0; border-radius: 11px; background: transparent;
+        color: var(--muted); display: grid; place-items: center; align-content: center; gap: 2px; font: inherit; font-size: 10px; font-weight: 760; cursor: pointer;
+      }
+      .app-mobile-bottom-item svg { width: 21px; height: 21px; }
+      .app-mobile-bottom-item span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .app-mobile-bottom-item.is-active { color: var(--accent); background: var(--accent-soft); }
+      .app-toast { bottom: calc(var(--app-mobile-bottom-bar-height) + 10px + env(safe-area-inset-bottom)); }
+    }
+    /* APP:END */
+
+  </style>
+</head>
+<body class="has-mobile-bottom-bar">
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5.5 5.5h13v15h-13z"/>
+            <path d="M8.5 3.5v4M15.5 3.5v4M8.5 13l2.2 2.2 4.8-5.4M8.5 18h7"/>
+          </svg>
+        </div>
+        <div class="brand-copy">
+          <p class="brand-name"><span id="brandName">受付・出欠チェック</span><span class="version-badge" id="versionBadge">v1.0.0</span></p>
+          <p class="brand-meta" data-i18n="brandMeta">名簿を繰り返し使える · 完全ローカル処理</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="button small soft focus-exit-button" id="exitFocusHeaderButton" type="button" data-i18n-title="exitReceptionFocusTitle" data-i18n-aria-label="exitReceptionFocusTitle" title="管理画面へ戻る" aria-label="管理画面へ戻る"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/><path d="M9 12h10"/></svg><span data-i18n="exitReceptionFocus">戻る</span></button>
+        <button class="language-button" id="languageButton" type="button" aria-label="Switch language">EN</button>
+        <button class="icon-button header-icon-button" id="helpButton" type="button" data-i18n-title="helpTitle" data-i18n-aria-label="helpTitle" title="使い方と注意事項" aria-label="使い方と注意事項">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.8 9a2.35 2.35 0 1 1 3.72 1.9c-.92.67-1.52 1.12-1.52 2.1"/><path d="M12 17h.01"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="main">
+    <section class="page-intro" aria-labelledby="heroTitle">
+      <div>
+        <h2 id="heroTitle" data-i18n="introTitle">受付・出欠チェック</h2>
+        <p data-i18n="lead">名簿を登録して、その場ですぐ受付。履歴は端末内に残り、次回も同じ名簿を使えます。</p>
+      </div>
+      <div class="local-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 5 6v5c0 4.6 2.8 8 7 10 4.2-2 7-5.4 7-10V6z"/><path d="m9 12 2 2 4-5"/></svg>
+        <span data-i18n="localBadge">完全ローカル処理</span>
+      </div>
+    </section>
+
+    <section class="sample-data-banner" id="sampleDataBanner" hidden aria-live="polite">
+      <div class="sample-data-banner-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/><circle cx="12" cy="12" r="3.5"/></svg></div>
+      <div class="sample-data-banner-copy"><strong data-i18n="sampleBannerTitle">サンプルデータを表示中</strong><span data-i18n="sampleBannerBody">使い方を確認できたら、サンプルだけ削除できます。</span></div>
+      <button class="button small" id="clearSampleButton" type="button" data-i18n="clearSample">サンプルデータをクリア</button>
+    </section>
+
+    <!-- APP:BEGIN Check-in Desk application. -->
+    <nav class="desktop-tabs" aria-label="Application sections">
+      <button class="desktop-tab is-active" type="button" data-page-key="reception" data-i18n="tabReception">受付</button>
+      <button class="desktop-tab" type="button" data-page-key="roster" data-i18n="tabRoster">名簿</button>
+      <button class="desktop-tab" type="button" data-page-key="history" data-i18n="tabHistory">履歴</button>
+      <button class="desktop-tab" type="button" data-page-key="data" data-i18n="tabData">データ</button>
+    </nav>
+
+    <section id="receptionPage" class="app-mobile-page is-active-desktop is-mobile-active" data-page="reception" aria-labelledby="receptionTitle">
+      <div class="app-grid">
+        <section class="panel" id="receptionPanel">
+          <div id="receptionEmpty" class="empty-state">
+            <div class="empty-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 5h14v16H5z"/><path d="M8 3v4M16 3v4M8 12h8M8 16h5"/></svg></div>
+            <h3 id="receptionTitle" data-i18n="noActiveSession">受付を始めましょう</h3>
+            <p id="receptionEmptyText" data-i18n="noActiveSessionBody">名簿を選んで受付セッションを開始すると、出欠や入退室を記録できます。</p>
+            <button class="button primary" id="startSessionButton" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg><span data-i18n="startReception">新しい受付を開始</span></button>
+          </div>
+
+          <div id="activeSession" class="hidden">
+            <div class="session-banner">
+              <div class="session-banner-main">
+                <div>
+                  <p class="section-kicker" data-i18n="activeReception">受付中</p>
+                  <div class="session-title-line"><h3 id="activeSessionName">—</h3><button class="toolbar-info-button session-title-edit" id="editActiveSessionNameButton" type="button" data-i18n-title="editSessionName" data-i18n-aria-label="editSessionName" title="受付名を編集" aria-label="受付名を編集"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4l11-11-4-4L4 16zM13.5 6.5l4 4"/></svg></button></div>
+                  <div class="session-meta"><span><span class="status-dot"></span><span id="activeSessionMode">—</span></span><span id="activeSessionStarted">—</span></div>
+                </div>
+                <div class="focus-session-actions">
+                  <button class="button small soft reception-focus-start" id="focusReceptionButton" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v14H4z"/><path d="M8 9h8M8 13h5"/></svg><span data-i18n="receptionFocus">受付専用表示</span></button>
+                  <button class="button small" id="endSessionButton" type="button" data-i18n="endReception">受付を終了</button>
+                </div>
+              </div>
+            </div>
+            <div class="panel-body">
+              <div class="metric-grid" aria-live="polite">
+                <div class="metric"><strong id="metricTarget">0</strong><span data-i18n="targetPeople">対象</span></div>
+                <div class="metric"><strong id="metricPresent">0</strong><span data-i18n="checkedIn">受付済み</span></div>
+                <div class="metric"><strong id="metricPending">0</strong><span data-i18n="notCheckedIn">未受付</span></div>
+                <div class="metric"><strong id="metricRate">0%</strong><span data-i18n="attendanceRate">受付率</span></div>
+              </div>
+              <div class="toolbar-line" style="margin-top:14px">
+                <div class="segmented" role="group" aria-label="Reception filter">
+                  <button class="segment is-active" type="button" data-reception-filter="pending"><span data-i18n="notCheckedIn">未受付</span> <span class="count-pill" id="pendingCountPill">0</span></button>
+                  <button class="segment" type="button" data-reception-filter="present"><span data-i18n="checkedIn">受付済み</span> <span class="count-pill" id="presentCountPill">0</span></button>
+                  <button class="segment" type="button" data-reception-filter="all"><span data-i18n="all">すべて</span></button>
+                </div>
+                <button class="button small soft" id="addWalkInButton" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="9" cy="8" r="3"/><path d="M4 20c0-3 2-5 5-5s5 2 5 5M18 8v6M15 11h6"/></svg><span data-i18n="addWalkIn">当日参加者を追加</span></button>
+              </div>
+              <div class="toolbar-line" style="margin-top:10px">
+                <div class="reception-search-tools">
+                  <div class="reception-search-stack">
+                    <label class="search-wrap"><span class="sr-only" data-i18n="search">検索</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="6"/><path d="m16 16 4 4"/></svg><input class="search-input" id="receptionSearch" type="search" autocomplete="off" enterkeyhint="done" data-i18n-placeholder="searchReception" placeholder="名前・ID・グループで検索"></label>
+                    <div class="search-hint" id="receptionSearchHint" aria-live="polite"></div>
+                  </div>
+                  <label class="field"><span class="field-label" data-i18n="groupFilter">グループで絞り込み</span><select class="field-select" id="receptionGroupFilter"><option value="" data-i18n="allGroups">すべてのグループ</option></select></label>
+                </div>
+              </div>
+            </div>
+            <div class="reception-layout">
+              <div class="panel" style="border-width:1px 0 0; border-radius:0; box-shadow:none">
+                <div class="member-list" id="receptionMemberList"></div>
+                <div class="empty-state hidden" id="receptionNoResults"><h3 data-i18n="noMatchingPeople">該当する人はいません</h3><p data-i18n="noMatchingPeopleBody">検索条件や表示切替を変更してください。</p></div>
+              </div>
+              <aside class="panel" style="margin:14px 14px 14px 0; box-shadow:none">
+                <div class="panel-head compact"><div><h3 class="panel-title" data-i18n="recentActivity">最近の受付</h3><p class="panel-subtitle" data-i18n="recentActivityBody">このセッションの直近の操作です。</p></div></div>
+                <div class="panel-body"><div class="recent-list" id="recentActivityList"></div><div class="inline-note" id="noRecentActivity" data-i18n="noRecentActivity">まだ記録はありません。</div></div>
+              </aside>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel" id="recentSessionsPanel">
+          <div class="panel-head"><div><h2 class="panel-title" data-i18n="recentSessions">最近の受付</h2><p class="panel-subtitle" data-i18n="recentSessionsBody">終了した受付も端末内に残り、いつでも履歴を確認できます。</p></div></div>
+          <div class="panel-body"><div class="session-list" id="recentSessionsList"></div><div class="empty-state" id="noSessionsYet"><h3 data-i18n="noSessions">まだ受付履歴がありません</h3><p data-i18n="noSessionsBody">最初の受付を始めると、ここに履歴が表示されます。</p></div></div>
+        </section>
+      </div>
+    </section>
+
+    <section id="rosterPage" class="app-mobile-page" data-page="roster" aria-labelledby="rosterTitle">
+      <section class="panel">
+        <div class="panel-head">
+          <div><h2 class="panel-title" id="rosterTitle" data-i18n="rosterTitle">名簿</h2><p class="panel-subtitle" data-i18n="rosterBody">一度登録した名簿は次回以降の受付でも使えます。</p></div>
+          <button class="button primary" id="addMemberButton" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="9" cy="8" r="3"/><path d="M4 20c0-3 2-5 5-5s5 2 5 5M18 8v6M15 11h6"/></svg><span data-i18n="addMember">メンバーを追加</span></button>
+        </div>
+        <div class="panel-body">
+          <div class="toolbar-line">
+            <label class="search-wrap"><span class="sr-only" data-i18n="search">検索</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="6"/><path d="m16 16 4 4"/></svg><input class="search-input" id="rosterSearch" type="search" autocomplete="off" data-i18n-placeholder="searchRoster" placeholder="名前・ID・グループ・メモで検索"></label>
+            <div class="button-row">
+              <button class="button small" id="importRosterButton" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 3v12M8 7l4-4 4 4M5 21h14"/></svg><span data-i18n="importCsv">CSV読込</span></button>
+              <button class="button small" id="exportRosterButton" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 15V3M8 11l4 4 4-4M5 21h14"/></svg><span data-i18n="exportCsv">CSV保存</span></button>
+              <button class="toolbar-info-button csv-format-info" id="csvFormatButton" type="button" data-i18n-title="csvFormat" data-i18n-aria-label="csvFormat" title="CSV形式" aria-label="CSV形式"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 10.5v6M12 7.5h.01"/></svg></button>
+              <input id="rosterCsvInput" class="sr-only" type="file" accept=".csv,text/csv">
+            </div>
+          </div>
+          <div class="toolbar-line" style="margin-top:10px"><div><strong id="rosterCount">0</strong> <span class="panel-subtitle" data-i18n="people">人</span></div><select class="field-select" id="rosterGroupFilter" style="width:auto;min-width:150px"><option value="" data-i18n="allGroups">すべてのグループ</option></select></div>
+        </div>
+        <div class="panel-body flush">
+          <table class="roster-table" id="rosterTable"><thead><tr><th data-i18n="name">名前</th><th data-i18n="memberId">ID</th><th data-i18n="group">グループ</th><th data-i18n="note">メモ</th><th><span class="sr-only" data-i18n="actions">操作</span></th></tr></thead><tbody id="rosterTableBody"></tbody></table>
+          <div class="empty-state" id="rosterEmpty"><h3 data-i18n="rosterEmpty">名簿はまだ空です</h3><p data-i18n="rosterEmptyBody">手入力またはCSVでメンバーを追加してください。</p><button class="button primary empty-action" id="addFirstMemberButton" type="button" data-i18n="addMember">メンバーを追加</button></div>
+          <div class="empty-state hidden" id="rosterNoResults"><h3 data-i18n="rosterNoResults">該当するメンバーはいません</h3><p data-i18n="rosterNoResultsBody">検索語やグループを変更してください。</p><button class="button empty-action" id="resetRosterFiltersButton" type="button" data-i18n="resetRosterFilters">絞り込みを解除</button></div>
+        </div>
+      </section>
+    </section>
+
+    <section id="historyPage" class="app-mobile-page" data-page="history" aria-labelledby="historyTitle">
+      <div class="app-grid">
+        <section class="panel">
+          <div class="panel-head"><div><h2 class="panel-title" id="historyTitle" data-i18n="historyTitle">受付履歴</h2><p class="panel-subtitle" data-i18n="historyBody">過去の受付ごとの結果を確認できます。</p></div><button class="button small" id="exportAttendanceButton" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 15V3M8 11l4 4 4-4M5 21h14"/></svg><span data-i18n="attendanceCsv">履歴CSV</span></button></div>
+          <div class="panel-body"><div class="session-list" id="historySessionList"></div><div class="empty-state" id="historyEmpty"><h3 data-i18n="noSessions">まだ受付履歴がありません</h3><p data-i18n="noSessionsBody">最初の受付を始めると、ここに履歴が表示されます。</p><button class="button primary empty-action" id="historyStartButton" type="button" data-i18n="goToReception">受付へ</button></div></div>
+        </section>
+        <section class="panel" id="matrixPanel">
+          <div class="panel-head"><div><h2 class="panel-title" data-i18n="attendanceMatrix">出席マトリクス</h2><p class="panel-subtitle" data-i18n="attendanceMatrixBody">最近の受付を横断して、参加状況を一覧できます。</p></div></div>
+          <div class="matrix-scroll"><table class="matrix" id="attendanceMatrix"></table></div>
+        </section>
+      </div>
+    </section>
+
+    <section id="dataPage" class="app-mobile-page" data-page="data" aria-labelledby="dataTitle">
+      <section class="panel">
+        <div class="panel-head"><div><h2 class="panel-title" id="dataTitle" data-i18n="dataTitle">データ管理</h2><p class="panel-subtitle" data-i18n="dataBody">名簿と受付履歴はこのブラウザーに保存されます。必要に応じてバックアップしてください。</p></div></div>
+        <div class="panel-body">
+          <div class="storage-warning hidden" id="storageWarning" role="status"></div>
+          <div class="metric-grid" style="margin-bottom:16px">
+            <div class="metric"><strong id="dataMemberCount">0</strong><span data-i18n="registeredPeople">登録メンバー</span></div>
+            <div class="metric"><strong id="dataSessionCount">0</strong><span data-i18n="sessions">受付回数</span></div>
+            <div class="metric"><strong id="dataEventCount">0</strong><span data-i18n="records">受付記録</span></div>
+            <div class="metric"><strong id="dataStorageSize">0 KB</strong><span data-i18n="localDataSize">端末内データ</span></div>
+          </div>
+          <div class="data-actions">
+            <div class="data-card"><h3 data-i18n="backupTitle">バックアップ</h3><p data-i18n="backupBody">名簿と受付履歴を1つのJSONファイルとして保存します。</p><button class="button" id="exportBackupButton" type="button" data-i18n="saveBackup">JSONバックアップを保存</button></div>
+            <div class="data-card"><h3 data-i18n="restoreTitle">復元</h3><p data-i18n="restoreBody">このアプリで保存したJSONバックアップからデータを復元します。</p><button class="button" id="importBackupButton" type="button" data-i18n="restoreBackup">JSONバックアップを読込</button><input id="backupInput" class="sr-only" type="file" accept=".json,application/json"></div>
+            <div class="data-card"><h3 data-i18n="privacyTitle">保存場所</h3><p data-i18n="privacyBody">データはこのブラウザーの端末内ストレージに保存され、このアプリから外部へ送信されません。</p><button class="button" id="copySummaryButton" type="button" data-i18n="copySummary">概要をコピー</button></div>
+            <div class="data-card"><h3 data-i18n="sampleRestoreTitle">サンプルデータ</h3><p data-i18n="sampleRestoreBody">使い方を確認するための名簿と受付履歴を、現在のデータを消さずに追加できます。</p><button class="button" id="restoreSampleButton" type="button" data-i18n="restoreSample">サンプルデータを表示</button></div>
+            <div class="data-card"><h3 data-i18n="resetTitle">すべて削除</h3><p data-i18n="resetBody">名簿と受付履歴をこのブラウザーから削除します。必要なら先にバックアップしてください。</p><button class="button danger" id="resetAllButton" type="button" data-i18n="resetAll">すべてのデータを削除</button></div>
+          </div>
+        </div>
+      </section>
+    </section>
+    <!-- APP:END -->
+
+  </main>
+
+  <footer><span id="footerName">受付・出欠チェック</span> · MIT License · <span data-i18n="footer">完全内包HTMLとして生成</span></footer>
+
+  <dialog class="app-form-dialog" id="memberDialog" aria-labelledby="memberDialogTitle">
+    <div class="dialog-header"><h2 id="memberDialogTitle" data-i18n="memberDialogAdd">メンバーを追加</h2><button class="icon-button" id="closeMemberDialog" type="button" data-i18n-aria-label="close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+    <div class="dialog-body"><form class="dialog-form" id="memberForm"><input type="hidden" id="editingMemberId"><div class="field-grid"><label class="field full"><span class="field-label" data-i18n="nameRequired">名前 *</span><input class="field-input" id="memberNameInput" maxlength="120" required autocomplete="off"></label><label class="field"><span class="field-label" data-i18n="memberId">ID</span><input class="field-input" id="memberExternalIdInput" maxlength="80" autocomplete="off"></label><label class="field"><span class="field-label" data-i18n="group">グループ</span><input class="field-input" id="memberGroupInput" maxlength="80" autocomplete="off"></label><label class="field full"><span class="field-label" data-i18n="note">メモ</span><textarea class="field-textarea" id="memberNoteInput" maxlength="500"></textarea></label></div><p class="inline-note hidden" id="memberSnapshotHint" data-i18n="activeRosterSnapshotNote">受付開始後の対象者は開始時点の名簿を保持します。名簿を編集・削除しても進行中または過去の受付記録は変わりません。</p><div class="dialog-actions"><button class="button" id="cancelMemberDialog" type="button" data-i18n="cancel">キャンセル</button><button class="button primary" type="submit" data-i18n="saveMember">保存</button></div></form></div>
+  </dialog>
+
+  <dialog class="app-form-dialog" id="sessionDialog" aria-labelledby="sessionDialogTitle">
+    <div class="dialog-header"><h2 id="sessionDialogTitle" data-i18n="startReception">新しい受付を開始</h2><button class="icon-button" id="closeSessionDialog" type="button" data-i18n-aria-label="close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+    <div class="dialog-body"><form class="dialog-form" id="sessionForm"><label class="field"><span class="field-label" data-i18n="receptionName">受付名</span><input class="field-input" id="sessionNameInput" maxlength="120" autocomplete="off" required></label><label class="field"><span class="field-label" data-i18n="targetRoster">対象</span><select class="field-select" id="sessionTargetGroup"><option value="" data-i18n="allMembers">全メンバー</option></select></label><fieldset class="field" style="border:0;padding:0;margin:0"><legend class="field-label" data-i18n="mode">受付方法</legend><div class="segmented" id="sessionModePicker"><button class="segment is-active" type="button" data-session-mode="checkin" data-i18n="modeCheckin">受付</button><button class="segment" type="button" data-session-mode="entryexit" data-i18n="modeEntryExit">入退室</button></div><p class="field-help" id="sessionModeHelp" data-i18n="modeCheckinHelp">最初の受付時刻を記録します。</p></fieldset><div class="inline-note" id="sessionTargetPreview"></div><div class="dialog-actions"><button class="button" id="cancelSessionDialog" type="button" data-i18n="cancel">キャンセル</button><button class="button primary" type="submit" data-i18n="startReception">受付を開始</button></div></form></div>
+  </dialog>
+
+  <dialog class="app-form-dialog" id="sessionNameDialog" aria-labelledby="sessionNameDialogTitle">
+    <div class="dialog-header"><h2 id="sessionNameDialogTitle" data-i18n="editSessionName">受付名を編集</h2><button class="icon-button" id="closeSessionNameDialog" type="button" data-i18n-aria-label="close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+    <div class="dialog-body"><form class="dialog-form" id="sessionNameForm"><input type="hidden" id="editingSessionId"><label class="field"><span class="field-label" data-i18n="receptionName">受付名</span><input class="field-input" id="editingSessionNameInput" maxlength="120" autocomplete="off" required></label><p class="field-help" data-i18n="editSessionNameHelp">受付名だけを変更します。対象者・受付方法・受付記録は変わりません。</p><div class="dialog-actions"><button class="button" id="cancelSessionNameDialog" type="button" data-i18n="cancel">キャンセル</button><button class="button primary" type="submit" data-i18n="saveSessionName">名前を保存</button></div></form></div>
+  </dialog>
+
+  <dialog class="app-form-dialog" id="walkInDialog" aria-labelledby="walkInDialogTitle">
+    <div class="dialog-header"><h2 id="walkInDialogTitle" data-i18n="addWalkIn">当日参加者を追加</h2><button class="icon-button" id="closeWalkInDialog" type="button" data-i18n-aria-label="close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+    <div class="dialog-body"><form class="dialog-form" id="walkInForm"><label class="field"><span class="field-label" data-i18n="nameRequired">名前 *</span><input class="field-input" id="walkInNameInput" maxlength="120" required autocomplete="off"></label><label class="checkbox-line"><input type="checkbox" id="walkInAddRoster"><span data-i18n="addToRosterToo">次回以降も使えるよう名簿にも追加する</span></label><div class="dialog-actions"><button class="button" id="cancelWalkInDialog" type="button" data-i18n="cancel">キャンセル</button><button class="button primary" type="submit" data-i18n="add">追加</button></div></form></div>
+  </dialog>
+
+  <dialog class="app-form-dialog" id="sessionDetailDialog" aria-labelledby="sessionDetailTitle">
+    <div class="dialog-header"><h2 id="sessionDetailTitle">Session</h2><button class="icon-button" id="closeSessionDetailDialog" type="button" data-i18n-aria-label="close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+    <div class="dialog-body" id="sessionDetailBody"></div>
+  </dialog>
+
+  <dialog class="app-form-dialog" id="personHistoryDialog" aria-labelledby="personHistoryTitle">
+    <div class="dialog-header"><h2 id="personHistoryTitle" data-i18n="personHistory">この人の履歴</h2><button class="icon-button" id="closePersonHistoryDialog" type="button" data-i18n-aria-label="close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+    <div class="dialog-body" id="personHistoryBody"></div>
+  </dialog>
+
+  <dialog class="app-form-dialog" id="csvPreviewDialog" aria-labelledby="csvPreviewTitle">
+    <div class="dialog-header"><h2 id="csvPreviewTitle" data-i18n="csvPreviewTitle">CSVの読み込み確認</h2><button class="icon-button" id="closeCsvPreviewDialog" type="button" data-i18n-aria-label="close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+    <div class="dialog-body">
+      <div class="csv-preview-summary">
+        <div class="csv-preview-stat"><strong id="csvPlannedCount">0</strong><span data-i18n="csvPlanned">追加予定</span></div>
+        <div class="csv-preview-stat"><strong id="csvDuplicateCount">0</strong><span data-i18n="csvDuplicates">重複候補</span></div>
+        <div class="csv-preview-stat"><strong id="csvSkippedCount">0</strong><span data-i18n="csvSkipped">読み飛ばし</span></div>
+      </div>
+      <label class="checkbox-line"><input type="checkbox" id="csvIncludeDuplicates"><span data-i18n="csvIncludeDuplicates">重複候補も追加する</span></label>
+      <p class="field-help" data-i18n="csvDuplicateHelp">同じID、または同じ名前を重複候補として扱います。</p>
+      <p class="field-help" data-i18n="csvSkippedHelp">名前が空の行や入力上限を超える行は読み飛ばします。余分な列は無視します。</p>
+      <div class="csv-preview-list" id="csvPreviewList" style="margin-top:12px"></div>
+      <div class="dialog-actions"><button class="button" id="cancelCsvPreviewDialog" type="button" data-i18n="cancel">キャンセル</button><button class="button primary" id="confirmCsvImportButton" type="button" data-i18n="csvImportConfirm">この内容で追加</button></div>
+    </div>
+  </dialog>
+
+  <nav class="app-mobile-bottom-bar" id="mobileNav" aria-label="Mobile navigation">
+    <button class="app-mobile-bottom-item is-active" type="button" data-page-key="reception" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 5h14v16H5z"/><path d="M8 3v4M16 3v4M8 12h8M8 16h5"/></svg><span data-i18n="tabReception">受付</span></button>
+    <button class="app-mobile-bottom-item" type="button" data-page-key="roster"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="8" cy="8" r="3"/><circle cx="16.5" cy="9" r="2.5"/><path d="M3 20c0-3.2 2-5 5-5s5 1.8 5 5M13 16c1-.8 2.1-1.2 3.5-1.2 2.5 0 4.5 1.6 4.5 4.2"/></svg><span data-i18n="tabRoster">名簿</span></button>
+    <button class="app-mobile-bottom-item" type="button" data-page-key="history"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/></svg><span data-i18n="tabHistory">履歴</span></button>
+    <button class="app-mobile-bottom-item" type="button" data-page-key="data"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M5 4h14v16H5z"/><path d="M8 4v5h8V4M8 16h8"/></svg><span data-i18n="tabData">データ</span></button>
+  </nav>
+
+  <div class="app-toast" id="appToast" role="status" aria-live="polite" aria-atomic="true" data-tone="default">
+    <span class="app-toast-message" id="appToastMessage"></span>
+    <button class="app-toast-action" id="appToastAction" type="button" hidden></button>
+  </div>
+
+  <!-- Reusable confirmation component. Keep in sync with components/confirm-dialog.html. -->
+  <dialog class="app-confirm-dialog" id="appConfirmDialog" aria-labelledby="appConfirmTitle" aria-describedby="appConfirmMessage">
+    <div class="app-confirm-header">
+      <h2 class="app-confirm-title" id="appConfirmTitle">確認</h2>
+      <button class="app-confirm-close" id="appConfirmClose" type="button" data-i18n-aria-label="close" aria-label="閉じる">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+    </div>
+    <div class="app-confirm-body">
+      <p class="app-confirm-message" id="appConfirmMessage"></p>
+      <div class="app-confirm-actions">
+        <button class="app-confirm-button" id="appConfirmCancel" type="button">キャンセル</button>
+        <button class="app-confirm-button primary" id="appConfirmOk" type="button">実行する</button>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog class="app-form-dialog" id="csvFormatDialog" aria-labelledby="csvFormatTitle">
+    <div class="dialog-header"><h2 id="csvFormatTitle" data-i18n="csvFormatTitle">名簿CSVの形式</h2><button class="icon-button" id="closeCsvFormatDialog" type="button" data-i18n-aria-label="close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+    <div class="dialog-body">
+      <p data-i18n="csvFormatIntro">1行目に見出しを入れ、2行目以降に1人ずつ記入します。名前だけ必須です。</p>
+      <div class="data-card" style="margin-top:14px">
+        <h3 style="margin:0;padding:0;border:0" data-i18n="csvColumnsTitle">列</h3>
+        <ul>
+          <li><code>name</code> / <span data-i18n="csvColName">名前 — 必須</span></li>
+          <li><code>id</code> / <span data-i18n="csvColId">ID — 任意</span></li>
+          <li><code>group</code> / <span data-i18n="csvColGroup">グループ — 任意</span></li>
+          <li><code>note</code> / <span data-i18n="csvColNote">メモ — 任意</span></li>
+        </ul>
+      </div>
+      <h3 data-i18n="csvExampleTitle">記入例</h3>
+      <pre id="csvFormatExample" style="margin:8px 0 0;padding:12px;overflow:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface-muted);font-size:12px;line-height:1.55;white-space:pre">名前,ID,グループ,メモ
+山田 太郎,001,Aグループ,</pre>
+      <p class="field-help" data-i18n="csvFormatNote">英語見出し（name,id,group,note）と日本語見出しの両方を読み込めます。見出しがない場合は1列目を名前として読み込みます。</p>
+      <div class="dialog-actions"><button class="button" id="downloadCsvTemplateButton" type="button" data-i18n="downloadCsvTemplate">CSVテンプレートを保存</button><button class="button primary" id="closeCsvFormatDialogBottom" type="button" data-i18n="close">閉じる</button></div>
+    </div>
+  </dialog>
+
+  <dialog id="helpDialog" aria-labelledby="helpTitle">
+    <div class="dialog-header">
+      <h2 id="helpTitle" data-i18n="helpTitle">使い方と注意事項</h2>
+      <button class="icon-button" id="closeHelpButton" type="button" data-i18n-title="close" data-i18n-aria-label="close" title="閉じる" aria-label="閉じる">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><path d="m7 7 10 10M17 7 7 17"/></svg>
+      </button>
+    </div>
+    <div class="dialog-body">
+
+      <!-- APP:HELP:BEGIN -->
+      <h3 data-i18n="helpBasicsTitle">基本の使い方</h3>
+      <ol>
+        <li data-i18n="helpStep1">名簿にメンバーを登録します。CSVからまとめて追加することもできます。</li>
+        <li data-i18n="helpStep2">受付タブで「新しい受付を開始」を選び、対象と受付方法を決めます。</li>
+        <li data-i18n="helpStep3">名前を検索して受付します。終了後も履歴は残り、次回は同じ名簿をそのまま使えます。</li>
+      </ol>
+      <h3 data-i18n="helpModesTitle">受付方法</h3>
+      <ul>
+        <li data-i18n="helpCheckin">受付: 1人につき1回の参加時刻を記録します。</li>
+        <li data-i18n="helpEntryExit">入退室: 同じ人の入室・退室・再入室を時系列で記録します。</li>
+        <li data-i18n="helpWalkIn">名簿にいない人は当日参加者として追加でき、必要なら名簿にも登録できます。</li>
+        <li data-i18n="helpCsv">名簿のCSV読込の横にある情報アイコンから、列の説明とテンプレートを確認できます。</li>
+        <li data-i18n="helpRosterSnapshot">受付を開始した後に名簿を編集・削除しても、その受付と過去の履歴には開始時点の名前が残ります。</li>
+      </ul>
+      <h3 data-i18n="helpPrivacyTitle">データとプライバシー</h3>
+      <p data-i18n="helpPrivacyBody">名簿と受付履歴はこのブラウザー内だけで処理・保存されます。このアプリからサーバーへ送信されません。</p>
+      <p class="dialog-note" data-i18n="helpBackup">ブラウザーのサイトデータを削除すると名簿や履歴も消える場合があります。継続利用する場合はJSONバックアップを保存してください。</p>
+      <h3 data-i18n="helpNotesTitle">注意事項</h3>
+      <ul>
+        <li data-i18n="helpNoteLocal">複数端末間の自動同期はありません。別端末へ移す場合はJSONバックアップを使います。</li>
+        <li data-i18n="helpNoteIdentity">本人確認や入退室のセキュリティゲート用途ではなく、受付・出欠記録のためのツールです。</li>
+        <li data-i18n="helpNoteStorage">重要な履歴はCSVまたはJSONとして保存してください。ブラウザーのストレージは消去されることがあります。</li>
+      </ul>
+      <p class="dialog-note" data-i18n="helpOffline">配布版は単一HTMLで、必要な処理はページ内で完結します。</p>
+      <!-- APP:HELP:END -->
+
+    </div>
+  </dialog>
+
+  <script>
+    (() => {
+      'use strict';
+
+      const APP_CONFIG = __APP_CONFIG_JSON__;
+      const BUILD_MANIFEST = __BUILD_MANIFEST_JSON__;
+      // Asset payloads are Base64 exactly once. The JSON bundle itself is embedded directly.
+      const assetBundle = __EMBEDDED_ASSET_BUNDLE_JSON__;
+      const blobUrls = new Set();
+      const assetByteCache = new Map();
+
+      function decodeBase64Bytes(base64) {
+        const binary = atob(base64);
+        const bytes = new Uint8Array(binary.length);
+        for (let index = 0; index < binary.length; index += 1) bytes[index] = binary.charCodeAt(index);
+        return bytes;
+      }
+
+      function getAsset(dependencyId, assetKey) {
+        const asset = assetBundle.dependencies?.[dependencyId]?.assets?.[assetKey];
+        if (!asset) throw new Error(`Embedded asset not found: ${dependencyId}/${assetKey}`);
+        return asset;
+      }
+
+      async function inflateAsset(asset) {
+        const stored = decodeBase64Bytes(asset.base64);
+        if (!asset.compression || asset.compression === 'none') return stored;
+        if (asset.compression !== 'gzip') throw new Error(`Unsupported embedded asset compression: ${asset.compression}`);
+        if (typeof DecompressionStream !== 'function') throw new Error('This browser cannot expand gzip-compressed embedded assets.');
+        const stream = new Blob([stored]).stream().pipeThrough(new DecompressionStream('gzip'));
+        const expanded = new Uint8Array(await new Response(stream).arrayBuffer());
+        if (Number.isFinite(asset.originalBytes) && expanded.byteLength !== asset.originalBytes) {
+          throw new Error(`Embedded gzip asset size mismatch: expected ${asset.originalBytes}, got ${expanded.byteLength}`);
+        }
+        return expanded;
+      }
+
+      window.StandaloneAssets = Object.freeze({
+        manifest: BUILD_MANIFEST,
+        list() {
+          return Object.entries(assetBundle.dependencies || {}).flatMap(([dependencyId, dependency]) =>
+            Object.keys(dependency.assets || {}).map(assetKey => `${dependencyId}/${assetKey}`));
+        },
+        has(dependencyId, assetKey) {
+          return Boolean(assetBundle.dependencies?.[dependencyId]?.assets?.[assetKey]);
+        },
+        bytes(dependencyId, assetKey) {
+          const asset = getAsset(dependencyId, assetKey);
+          if (asset.compression && asset.compression !== 'none') {
+            throw new Error(`Embedded asset ${dependencyId}/${assetKey} is gzip-compressed; use await StandaloneAssets.bytesAsync().`);
+          }
+          return decodeBase64Bytes(asset.base64);
+        },
+        async bytesAsync(dependencyId, assetKey) {
+          const cacheKey = `${dependencyId}/${assetKey}`;
+          if (!assetByteCache.has(cacheKey)) assetByteCache.set(cacheKey, inflateAsset(getAsset(dependencyId, assetKey)));
+          return new Uint8Array(await assetByteCache.get(cacheKey));
+        },
+        text(dependencyId, assetKey) {
+          return new TextDecoder().decode(this.bytes(dependencyId, assetKey));
+        },
+        async textAsync(dependencyId, assetKey) {
+          return new TextDecoder().decode(await this.bytesAsync(dependencyId, assetKey));
+        },
+        blobUrl(dependencyId, assetKey) {
+          const asset = getAsset(dependencyId, assetKey);
+          const url = URL.createObjectURL(new Blob([this.bytes(dependencyId, assetKey)], { type: asset.mime || 'application/octet-stream' }));
+          blobUrls.add(url);
+          return url;
+        },
+        async blobUrlAsync(dependencyId, assetKey) {
+          const asset = getAsset(dependencyId, assetKey);
+          const url = URL.createObjectURL(new Blob([await this.bytesAsync(dependencyId, assetKey)], { type: asset.mime || 'application/octet-stream' }));
+          blobUrls.add(url);
+          return url;
+        },
+        async loadClassicScript(dependencyId, assetKey, globalName = '') {
+          const sourceUrl = await this.blobUrlAsync(dependencyId, assetKey);
+          try {
+            await new Promise((resolve, reject) => {
+              const script = document.createElement('script');
+              script.src = sourceUrl;
+              script.onload = resolve;
+              script.onerror = () => reject(new Error(`Failed to load embedded script: ${dependencyId}/${assetKey}`));
+              document.head.append(script);
+            });
+            return globalName ? window[globalName] : true;
+          } finally {
+            URL.revokeObjectURL(sourceUrl);
+            blobUrls.delete(sourceUrl);
+          }
+        },
+        async importModule(dependencyId, assetKey) {
+          const sourceUrl = await this.blobUrlAsync(dependencyId, assetKey);
+          try {
+            return await import(sourceUrl);
+          } finally {
+            URL.revokeObjectURL(sourceUrl);
+            blobUrls.delete(sourceUrl);
+          }
+        }
+      });
+
+      window.addEventListener('pagehide', () => {
+        blobUrls.forEach(url => URL.revokeObjectURL(url));
+        blobUrls.clear();
+      });
+
+      const translations = {
+        ja: {
+          brandMeta: '名簿を繰り返し使える · 完全ローカル処理', helpTitle: '使い方と注意事項', close: '閉じる',
+          introTitle: '受付・出欠チェック', lead: '名簿を登録して、その場ですぐ受付。履歴は端末内に残り、次回も同じ名簿を使えます。', localBadge: '完全ローカル処理',
+          tabReception:'受付', tabRoster:'名簿', tabHistory:'履歴', tabData:'データ',
+          sampleBannerTitle:'サンプルデータを表示中', sampleBannerBody:'使い方を確認できたら、サンプルだけ削除できます。', clearSample:'サンプルデータをクリア', clearSampleTitle:'サンプルデータをクリアしますか？', clearSampleMessage:'最初から入っているサンプル名簿とサンプル受付履歴だけを削除します。あなたが追加したデータは残ります。', sampleCleared:'サンプルデータをクリアしました', sampleRestoreTitle:'サンプルデータ', sampleRestoreBody:'使い方を確認するための名簿と受付履歴を、現在のデータを消さずに追加できます。', restoreSample:'サンプルデータを表示', sampleRestored:'サンプルデータを追加しました', sampleAlreadyVisible:'サンプルデータはすでに表示されています。',
+          noActiveSession:'受付を始めましょう', noActiveSessionBody:'名簿を選んで受付セッションを開始すると、出欠や入退室を記録できます。', noRosterForReception:'まず名簿を登録してください', noRosterForReceptionBody:'受付を始めるには、先にメンバーを追加します。CSVからまとめて追加することもできます。', startReception:'新しい受付を開始', goToReception:'受付へ', viewHistory:'履歴を見る', activeReception:'受付中', endReception:'受付を終了', receptionFocus:'受付専用表示', exitReceptionFocus:'戻る', exitReceptionFocusTitle:'管理画面へ戻る',
+          targetPeople:'対象', checkedIn:'受付済み', notCheckedIn:'未受付', attendanceRate:'受付率', all:'すべて', addWalkIn:'当日参加者を追加', search:'検索', searchReception:'名前・ID・グループで検索', groupFilter:'グループで絞り込み', noGroup:'グループなし', enterToCheckIn:'Enterで「{name}」を受付', enterToToggle:'Enterで「{name}」を{action}', alreadyCheckedIn:'この人は受付済みです。', noMatchingPeople:'該当する人はいません', noMatchingPeopleBody:'検索条件や表示切替を変更してください。',
+          recentActivity:'最近の受付', recentActivityBody:'名前を押すと、この人の今日の履歴を確認できます。', noRecentActivity:'まだ記録はありません。', personHistory:'この人の履歴', currentStatus:'現在の状態', recentSessions:'最近の受付', recentSessionsBody:'終了した受付も端末内に残り、いつでも履歴を確認できます。', noSessions:'まだ受付履歴がありません', noSessionsBody:'最初の受付を始めると、ここに履歴が表示されます。',
+          rosterTitle:'名簿', rosterBody:'一度登録した名簿は次回以降の受付でも使えます。', addMember:'メンバーを追加', importCsv:'CSV読込', exportCsv:'CSV保存', searchRoster:'名前・ID・グループ・メモで検索', people:'人', allGroups:'すべてのグループ', name:'名前', memberId:'ID', group:'グループ', note:'メモ', actions:'操作', rosterEmpty:'名簿はまだ空です', rosterEmptyBody:'手入力またはCSVでメンバーを追加してください。', rosterNoResults:'該当するメンバーはいません', rosterNoResultsBody:'検索語やグループを変更してください。', resetRosterFilters:'絞り込みを解除',
+          historyTitle:'受付履歴', historyBody:'過去の受付ごとの結果を確認できます。不要な受付履歴は1件ずつ削除できます。', attendanceCsv:'履歴CSV', deleteSessionTitle:'受付履歴を削除', deleteSessionMessage:'「{name}」の受付履歴を削除します。出席マトリクスからも消えます。', deleteSessionConfirm:'履歴を削除', sessionDeleted:'受付履歴を削除しました', sessionRestored:'受付履歴を元に戻しました', attendanceMatrix:'出席マトリクス', attendanceMatrixBody:'最近の受付を横断して、参加状況を一覧できます。',
+          dataTitle:'データ管理', dataBody:'名簿と受付履歴はこのブラウザーに保存されます。必要に応じてバックアップしてください。', registeredPeople:'登録メンバー', sessions:'受付回数', records:'受付記録', localDataSize:'端末内データ', backupTitle:'バックアップ', backupBody:'名簿と受付履歴を1つのJSONファイルとして保存します。', saveBackup:'JSONバックアップを保存', restoreTitle:'復元', restoreBody:'このアプリで保存したJSONバックアップからデータを復元します。', restoreBackup:'JSONバックアップを読込', privacyTitle:'保存場所', privacyBody:'データはこのブラウザーの端末内ストレージに保存され、このアプリから外部へ送信されません。', copySummary:'概要をコピー', resetTitle:'すべて削除', resetBody:'名簿と受付履歴をこのブラウザーから削除します。必要なら先にバックアップしてください。', resetAll:'すべてのデータを削除',
+          memberDialogAdd:'メンバーを追加', memberDialogEdit:'メンバーを編集', activeRosterSnapshotNote:'受付開始後の対象者は開始時点の名簿を保持します。名簿を編集・削除しても進行中または過去の受付記録は変わりません。', editSessionName:'受付名を編集', editSessionNameHelp:'受付名だけを変更します。対象者・受付方法・受付記録は変わりません。', saveSessionName:'名前を保存', sessionNameSaved:'受付名を変更しました', nameRequired:'名前 *', saveMember:'保存', cancel:'キャンセル', confirmTitle:'確認', confirmAction:'実行する', delete:'削除', edit:'編集', undo:'元に戻す', add:'追加',
+          receptionName:'受付名', targetRoster:'対象', allMembers:'全メンバー', mode:'受付方法', modeCheckin:'受付', modeEntryExit:'入退室', modeCheckinHelp:'最初の受付時刻を記録します。', modeEntryExitHelp:'入室・退室・再入室を時系列で記録します。', targetPreview:'対象: {count}人', noTargetMembers:'対象となるメンバーがいません。先に名簿を登録してください。',
+          addToRosterToo:'次回以降も使えるよう名簿にも追加する', walkIn:'当日参加', checkedAt:'{time} 受付', enter:'入室', exit:'退室', inside:'入室中', outside:'退室中', checkIn:'受付', cancelCheckin:'取消',
+          modeCheckinLabel:'受付', modeEntryExitLabel:'入退室', started:'開始 {time}', ended:'終了 {time}', ongoing:'受付中', sessionSummary:'{present} / {target}人', viewDetails:'詳細', reopen:'受付を再開',
+          activityCheckin:'受付', activityCancel:'受付取消', activityEnter:'入室', activityExit:'退室', activityUndoCheckin:'受付を取り消し', activityUndoEnter:'入室を取り消し', activityUndoExit:'退室を取り消し', activityUndoAction:'前の取消を元に戻し', revertRecent:'戻す', activityReverted:'操作を戻しました', activityRestored:'元に戻した操作を復元しました', recordUndone:'記録を戻しました', sessionActivityLog:'操作履歴',
+          deleteMemberTitle:'メンバーを削除', deleteMemberMessage:'「{name}」を名簿から削除します。過去の受付履歴と、すでに開始している受付の対象者には名前が残ります。', memberDeleted:'メンバーを削除しました', memberSaved:'メンバーを保存しました', memberAdded:'メンバーを追加しました', memberRestored:'メンバーを元に戻しました',
+          endSessionTitle:'受付を終了', endSessionMessage:'「{name}」の受付を終了します。履歴は保存されます。', sessionEnded:'受付を終了しました', sessionStarted:'受付を開始しました', sessionReopened:'受付を再開しました',
+          cancelCheckinTitle:'受付を取り消す', cancelCheckinMessage:'「{name}」の受付を取り消します。取り消した記録も履歴に残ります。', checkinCancelled:'受付を取り消しました', recorded:'記録しました',
+          walkInAdded:'当日参加者を追加しました', rosterAlsoAdded:'名簿にも追加しました', duplicateName:'同じ名前のメンバーが既にいます。',
+          csvFormat:'CSV形式', csvFormatTitle:'名簿CSVの形式', csvFormatIntro:'1行目に見出しを入れ、2行目以降に1人ずつ記入します。名前だけ必須です。', csvColumnsTitle:'列', csvColName:'名前 — 必須', csvColId:'ID — 任意', csvColGroup:'グループ — 任意', csvColNote:'メモ — 任意', csvExampleTitle:'記入例', csvFormatNote:'英語見出し（name,id,group,note）と日本語見出しの両方を読み込めます。見出しがない場合は1列目を名前として読み込みます。余分な列は無視し、1回に最大5,000人まで読み込めます。', downloadCsvTemplate:'CSVテンプレートを保存', csvImported:'{count}人を追加しました', csvNoRows:'追加できる行がありませんでした。', csvInvalid:'CSVを読み込めませんでした。1列目または name / 名前 列に名前を入れてください。', csvPartial:'{added}人を追加、{skipped}行をスキップしました。', csvPreviewTitle:'CSVの読み込み確認', csvPlanned:'追加予定', csvDuplicates:'重複候補', csvSkipped:'読み飛ばし', csvIncludeDuplicates:'重複候補も追加する', csvDuplicateHelp:'同じID、または同じ名前を重複候補として扱います。IDが同じで名前が違う場合も確認できます。', csvSkippedHelp:'名前が空の行や入力上限を超える行は読み飛ばします。余分な列は無視します。', csvDuplicateId:'ID重複', csvDuplicateName:'名前重複', csvIdConflict:'同じID・別名', csvNameConflict:'同じ名前・別ID', csvRowsLimit:'CSVは最大5,000人まで読み込めます。', csvImportConfirm:'この内容で追加', csvDuplicateTag:'重複候補', csvMoreRows:'ほか {count}人', downloaded:'ファイルを保存しました', copied:'コピーしました', copyFailed:'コピーできませんでした',
+          backupRestored:'バックアップを復元しました', backupInvalid:'このバックアップを読み込めませんでした。', restoreConfirmTitle:'バックアップを復元', restoreConfirmMessage:'現在の名簿と受付履歴を、選択したバックアップで置き換えます。', resetConfirmTitle:'すべてのデータを削除', resetConfirmMessage:'名簿と受付履歴をこのブラウザーから削除します。この操作は元に戻せません。', resetDone:'すべてのデータを削除しました',
+          noHistory:'記録なし', presentMark:'出席', sessionCsv:'この受付をCSV保存', walkInCount:'当日参加', storageWriteFailed:'端末内ストレージへ保存できませんでした。このページを閉じる前にJSONバックアップを保存してください。', storageReadFailed:'保存済みデータを読み込めませんでした。現在のデータを上書きしないため自動保存を停止しています。JSONバックアップから復元するか、すべて削除して再開してください。', storageBlocked:'自動保存は停止中です。JSONバックアップから復元するか、すべて削除してください。', absentMark:'欠席', notTarget:'対象外', sessionDetailPeople:'対象者', sessionDetailEvents:'記録', walkInOnly:'今回のみ',
+          helpBasicsTitle:'基本の使い方', helpStep1:'名簿にメンバーを登録します。CSVからまとめて追加することもできます。', helpStep2:'受付タブで「新しい受付を開始」を選び、対象と受付方法を決めます。', helpStep3:'名前を検索して受付します。終了後も履歴は残り、次回は同じ名簿をそのまま使えます。', helpModesTitle:'受付方法', helpCheckin:'受付: 1人につき1回の参加時刻を記録します。', helpEntryExit:'入退室: 同じ人の入室・退室・再入室を時系列で記録します。', helpWalkIn:'名簿にいない人は当日参加者として追加でき、必要なら名簿にも登録できます。', helpCsv:'名簿のCSV読込の横にある情報アイコンから、列の説明とテンプレートを確認できます。', helpRosterSnapshot:'受付を開始した後に名簿を編集・削除しても、その受付と過去の履歴には開始時点の名前が残ります。', helpPrivacyTitle:'データとプライバシー', helpPrivacyBody:'名簿と受付履歴はこのブラウザー内だけで処理・保存されます。このアプリからサーバーへ送信されません。', helpBackup:'ブラウザーのサイトデータを削除すると名簿や履歴も消える場合があります。継続利用する場合はJSONバックアップを保存してください。', helpNotesTitle:'注意事項', helpNoteLocal:'複数端末間の自動同期はありません。別端末へ移す場合はJSONバックアップを使います。', helpNoteIdentity:'本人確認や入退室のセキュリティゲート用途ではなく、受付・出欠記録のためのツールです。', helpNoteStorage:'重要な履歴はCSVまたはJSONとして保存してください。ブラウザーのストレージは消去されることがあります。', helpOffline:'配布版は単一HTMLで、必要な処理はページ内で完結します。', footer:'完全内包HTMLとして生成'
+        },
+        en: {
+          brandMeta:'Reusable roster · Fully local processing', helpTitle:'How to use & notes', close:'Close',
+          introTitle:'Check-in & attendance', lead:'Keep a reusable roster, start a reception in seconds, and retain attendance history locally for next time.', localBadge:'Fully local processing',
+          tabReception:'Check-in', tabRoster:'Roster', tabHistory:'History', tabData:'Data',
+          sampleBannerTitle:'Sample data is displayed', sampleBannerBody:'When you are done exploring, you can remove only the sample data.', clearSample:'Clear sample data', clearSampleTitle:'Clear sample data?', clearSampleMessage:'Remove only the built-in sample roster and sample check-in history. Data you added will remain.', sampleCleared:'Sample data cleared', sampleRestoreTitle:'Sample data', sampleRestoreBody:'Add the sample roster and check-in history without replacing your current data.', restoreSample:'Show sample data', sampleRestored:'Sample data added', sampleAlreadyVisible:'Sample data is already displayed.',
+          noActiveSession:'Start a check-in', noActiveSessionBody:'Choose a roster and start a session to record attendance or entry/exit.', noRosterForReception:'Add people to the roster first', noRosterForReceptionBody:'Add at least one person before starting a check-in. You can also import a roster from CSV.', startReception:'Start new check-in', goToReception:'Go to check-in', viewHistory:'View history', activeReception:'Active check-in', endReception:'End check-in', receptionFocus:'Reception view', exitReceptionFocus:'Back', exitReceptionFocusTitle:'Back to management view',
+          targetPeople:'Target', checkedIn:'Checked in', notCheckedIn:'Pending', attendanceRate:'Check-in rate', all:'All', addWalkIn:'Add walk-in', search:'Search', searchReception:'Search name, ID, or group', groupFilter:'Filter by group', noGroup:'No group', enterToCheckIn:'Press Enter to check in “{name}”', enterToToggle:'Press Enter to {action} “{name}”', alreadyCheckedIn:'This person is already checked in.', noMatchingPeople:'No matching people', noMatchingPeopleBody:'Change the search or filter and try again.',
+          recentActivity:'Recent activity', recentActivityBody:'Select a name to view this person’s session history.', noRecentActivity:'No activity yet.', personHistory:'Person history', currentStatus:'Current status', recentSessions:'Recent check-ins', recentSessionsBody:'Completed sessions remain on this device for later review.', noSessions:'No check-in history yet', noSessionsBody:'Start your first check-in and it will appear here.',
+          rosterTitle:'Roster', rosterBody:'Keep one roster and reuse it for future check-ins.', addMember:'Add member', importCsv:'Import CSV', exportCsv:'Save CSV', searchRoster:'Search name, ID, group, or note', people:'people', allGroups:'All groups', name:'Name', memberId:'ID', group:'Group', note:'Note', actions:'Actions', rosterEmpty:'Your roster is empty', rosterEmptyBody:'Add members manually or import a CSV file.', rosterNoResults:'No matching members', rosterNoResultsBody:'Change the search text or group filter.', resetRosterFilters:'Clear filters',
+          historyTitle:'Check-in history', historyBody:'Review previous sessions and remove individual sessions you no longer need.', attendanceCsv:'History CSV', deleteSessionTitle:'Delete check-in history', deleteSessionMessage:'Delete the history for “{name}”? It will also disappear from the attendance matrix.', deleteSessionConfirm:'Delete history', sessionDeleted:'Check-in history deleted', sessionRestored:'Check-in history restored', attendanceMatrix:'Attendance matrix', attendanceMatrixBody:'Compare attendance across recent sessions.',
+          dataTitle:'Data management', dataBody:'Roster and check-in history are stored in this browser. Save a backup when needed.', registeredPeople:'Registered people', sessions:'Sessions', records:'Records', localDataSize:'Local data', backupTitle:'Backup', backupBody:'Save the roster and all session history in one JSON file.', saveBackup:'Save JSON backup', restoreTitle:'Restore', restoreBody:'Restore data from a JSON backup created by this app.', restoreBackup:'Open JSON backup', privacyTitle:'Storage', privacyBody:'Data is stored in this browser and is not sent outside by this app.', copySummary:'Copy summary', resetTitle:'Delete all', resetBody:'Delete the roster and check-in history from this browser. Back up first if needed.', resetAll:'Delete all data',
+          memberDialogAdd:'Add member', memberDialogEdit:'Edit member', activeRosterSnapshotNote:'A check-in keeps the roster snapshot from when it started. Editing or deleting the reusable roster does not change active or past check-in records.', editSessionName:'Edit check-in name', editSessionNameHelp:'Only the session name changes. People, mode, and records stay the same.', saveSessionName:'Save name', sessionNameSaved:'Check-in name updated', nameRequired:'Name *', saveMember:'Save', cancel:'Cancel', confirmTitle:'Confirm', confirmAction:'Continue', delete:'Delete', edit:'Edit', undo:'Undo', add:'Add',
+          receptionName:'Check-in name', targetRoster:'Target', allMembers:'All members', mode:'Mode', modeCheckin:'Check-in', modeEntryExit:'Entry / Exit', modeCheckinHelp:'Record the first check-in time for each person.', modeEntryExitHelp:'Record entry, exit, and re-entry in chronological order.', targetPreview:'Target: {count} people', noTargetMembers:'There are no target members. Add people to the roster first.',
+          addToRosterToo:'Also add this person to the reusable roster', walkIn:'Walk-in', checkedAt:'Checked in {time}', enter:'Enter', exit:'Exit', inside:'Inside', outside:'Outside', checkIn:'Check in', cancelCheckin:'Cancel',
+          modeCheckinLabel:'Check-in', modeEntryExitLabel:'Entry / Exit', started:'Started {time}', ended:'Ended {time}', ongoing:'Active', sessionSummary:'{present} / {target}', viewDetails:'Details', reopen:'Reopen',
+          activityCheckin:'Check-in', activityCancel:'Check-in cancelled', activityEnter:'Entry', activityExit:'Exit', activityUndoCheckin:'Check-in undone', activityUndoEnter:'Entry undone', activityUndoExit:'Exit undone', activityUndoAction:'Previous undo restored', revertRecent:'Undo', activityReverted:'Action undone', activityRestored:'Undone action restored', recordUndone:'Record undone', sessionActivityLog:'Activity log',
+          deleteMemberTitle:'Delete member', deleteMemberMessage:'Delete “{name}” from the roster? Their name will remain in past history and any check-in that has already started.', memberDeleted:'Member deleted', memberSaved:'Member saved', memberAdded:'Member added', memberRestored:'Member restored',
+          endSessionTitle:'End check-in', endSessionMessage:'End “{name}”? The session history will be kept.', sessionEnded:'Check-in ended', sessionStarted:'Check-in started', sessionReopened:'Check-in reopened',
+          cancelCheckinTitle:'Cancel check-in', cancelCheckinMessage:'Cancel the check-in for “{name}”? The cancellation will remain in the activity history.', checkinCancelled:'Check-in cancelled', recorded:'Recorded',
+          walkInAdded:'Walk-in added', rosterAlsoAdded:'Also added to roster', duplicateName:'A member with the same name already exists.',
+          csvFormat:'CSV format', csvFormatTitle:'Roster CSV format', csvFormatIntro:'Put column headers on the first row and one person per row after that. Only the name is required.', csvColumnsTitle:'Columns', csvColName:'Name — required', csvColId:'ID — optional', csvColGroup:'Group — optional', csvColNote:'Note — optional', csvExampleTitle:'Example', csvFormatNote:'Both English headers (name,id,group,note) and Japanese headers are supported. Without headers, the first column is treated as the name. Extra columns are ignored; up to 5,000 people can be imported at once.', downloadCsvTemplate:'Save CSV template', csvImported:'Added {count} people', csvNoRows:'No rows could be added.', csvInvalid:'Could not read the CSV. Put names in the first column or a name / 名前 column.', csvPartial:'Added {added} people; skipped {skipped} rows.', csvPreviewTitle:'Review CSV import', csvPlanned:'Will add', csvDuplicates:'Possible duplicates', csvSkipped:'Skipped', csvIncludeDuplicates:'Add possible duplicates too', csvDuplicateHelp:'Matching ID or matching name is treated as a possible duplicate. A matching ID with a different name is also highlighted.', csvSkippedHelp:'Rows with no name or values over the input limits are skipped. Extra columns are ignored.', csvDuplicateId:'Duplicate ID', csvDuplicateName:'Duplicate name', csvIdConflict:'Same ID, different name', csvNameConflict:'Same name, different ID', csvRowsLimit:'Up to 5,000 people can be imported at once.', csvImportConfirm:'Add these people', csvDuplicateTag:'Possible duplicate', csvMoreRows:'{count} more people', downloaded:'File saved', copied:'Copied', copyFailed:'Could not copy',
+          backupRestored:'Backup restored', backupInvalid:'This backup could not be read.', restoreConfirmTitle:'Restore backup', restoreConfirmMessage:'Replace the current roster and history with the selected backup?', resetConfirmTitle:'Delete all data', resetConfirmMessage:'Delete the roster and all check-in history from this browser? This cannot be undone.', resetDone:'All data deleted',
+          noHistory:'No records', presentMark:'Present', sessionCsv:'Save this check-in CSV', walkInCount:'Walk-ins', storageWriteFailed:'Could not save to browser storage. Save a JSON backup before closing this page.', storageReadFailed:'Saved data could not be read. Automatic saving is paused to avoid overwriting it. Restore a JSON backup or delete all data to start over.', storageBlocked:'Automatic saving is paused. Restore a JSON backup or delete all data.', absentMark:'Absent', notTarget:'Not target', sessionDetailPeople:'People', sessionDetailEvents:'Records', walkInOnly:'This session only',
+          helpBasicsTitle:'Basics', helpStep1:'Add people to the roster. You can also import many people from CSV.', helpStep2:'On Check-in, choose Start new check-in, then select the target group and mode.', helpStep3:'Search for a name and record attendance. The history remains available and the same roster can be reused next time.', helpModesTitle:'Modes', helpCheckin:'Check-in records one attendance time per person.', helpEntryExit:'Entry / Exit records repeated entry, exit, and re-entry events.', helpWalkIn:'People not on the roster can be added as walk-ins, with the option to add them to the reusable roster too.', helpCsv:'Use the info icon next to Import CSV on the Roster screen to view supported columns and save a template.', helpRosterSnapshot:'After a check-in starts, editing or deleting the reusable roster does not change that session or past history.', helpPrivacyTitle:'Data & privacy', helpPrivacyBody:'The roster and check-in history are processed and stored only in this browser. This app does not send them to a server.', helpBackup:'Clearing browser site data can remove the roster and history. Save a JSON backup when you need to keep or move the data.', helpNotesTitle:'Notes', helpNoteLocal:'There is no automatic multi-device sync. Use a JSON backup to move data between devices.', helpNoteIdentity:'This is an attendance and reception tool, not an identity-verification system or security access gate.', helpNoteStorage:'Save important history as CSV or JSON because browser storage can be cleared.', helpOffline:'The distributable is a single HTML file and all required processing stays inside the page.', footer:'Generated as one self-contained HTML file'
+        }
+      };
+
+      const STORAGE_KEY = `${APP_CONFIG.slug}:state-v1`;
+      const LANGUAGE_KEY = `${APP_CONFIG.slug}:language`;
+      const FOCUS_KEY = `${APP_CONFIG.slug}:reception-focus`;
+      const SCHEMA_VERSION = 1;
+      let storageReadFailure = false, storageWriteFailure = false, storageOverwriteBlocked = false, storageWarningShown = false;
+      const $ = selector => document.querySelector(selector);
+      const $$ = selector => Array.from(document.querySelectorAll(selector));
+      let language = readStorage(LANGUAGE_KEY) || detectLanguage();
+      let currentPage = 'reception';
+      let receptionFilter = 'pending';
+      let receptionGroupFilter = '';
+      let receptionFocus = false;
+      let pendingCsvImport = null;
+      let sessionModeDraft = 'checkin';
+      let state = loadState();
+      try { receptionFocus = sessionStorage.getItem(FOCUS_KEY)==='1' && Boolean(activeSession()); } catch {}
+
+      function blankState(sampleDismissed=false) { return { schemaVersion: SCHEMA_VERSION, members: [], sessions: [], activeSessionId: null, sampleDismissed: Boolean(sampleDismissed), updatedAt: new Date().toISOString() }; }
+      function sampleIso(daysAgo,hour,minute){const d=new Date();d.setHours(hour,minute,0,0);d.setDate(d.getDate()-daysAgo);return d.toISOString();}
+      function sampleState() {
+        const ja=language==='ja';
+        const names=ja?['佐藤 花子','田中 太郎','鈴木 美咲','高橋 健','伊藤 葵','山本 翔']:['Hana Sato','Taro Tanaka','Misaki Suzuki','Ken Takahashi','Aoi Ito','Sho Yamamoto'];
+        const groups=ja?['午前クラス','午前クラス','午前クラス','午後クラス','午後クラス','午後クラス']:['Morning','Morning','Morning','Afternoon','Afternoon','Afternoon'];
+        const notes=ja?['初回参加','','受付で資料を渡す','','','']:['First visit','','Hand out materials at reception','','',''];
+        const members=names.map((name,index)=>({id:`sample-member-${index+1}`,name,externalId:`S${String(index+1).padStart(3,'0')}`,group:groups[index],note:notes[index],sample:true,createdAt:sampleIso(21,9,0)}));
+        const snapshots=members.map(m=>({memberId:m.id,name:m.name,externalId:m.externalId,group:m.group,isWalkIn:false}));
+        const makeSession=(number,daysAgo,presentIndexes)=>({id:`sample-session-${number}`,name:ja?`サンプル受付 ${number}`:`Sample check-in ${number}`,mode:'checkin',targetGroup:null,startedAt:sampleIso(daysAgo,9,30),endedAt:sampleIso(daysAgo,10,30),targetMembers:snapshots.map(p=>({...p})),events:presentIndexes.map((memberIndex,eventIndex)=>({id:`sample-event-${number}-${eventIndex+1}`,personId:members[memberIndex].id,personName:members[memberIndex].name,type:'checkin',at:sampleIso(daysAgo,9,35+eventIndex*4)})),sample:true});
+        return {schemaVersion:SCHEMA_VERSION,members,sessions:[makeSession(1,14,[0,1,2,3,5]),makeSession(2,7,[0,2,3,4])],activeSessionId:null,sampleDismissed:false,updatedAt:new Date().toISOString()};
+      }
+      function normalizeState(value) {
+        if (!value || typeof value !== 'object' || !Array.isArray(value.members) || !Array.isArray(value.sessions)) return blankState();
+        return { schemaVersion: SCHEMA_VERSION, members: value.members.filter(Boolean), sessions: value.sessions.filter(Boolean), activeSessionId: value.activeSessionId || null, sampleDismissed: Boolean(value.sampleDismissed), updatedAt: value.updatedAt || new Date().toISOString() };
+      }
+      function loadState() {
+        let raw=null;
+        try { raw=localStorage.getItem(STORAGE_KEY); } catch { storageReadFailure=true; storageOverwriteBlocked=true; return blankState(true); }
+        if(!raw)return sampleState();
+        try { const loaded=normalizeState(JSON.parse(raw)); if(!loaded.members.length&&!loaded.sessions.length&&!loaded.sampleDismissed)return sampleState(); return loaded; }
+        catch { storageReadFailure=true; storageOverwriteBlocked=true; return blankState(true); }
+      }
+      function persist({force=false}={}) {
+        state.updatedAt=new Date().toISOString(); let saved=false;
+        if(!storageOverwriteBlocked||force){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(state));saved=true;storageWriteFailure=false;if(force)storageOverwriteBlocked=false;}catch{storageWriteFailure=true;}}
+        renderAll();
+        if((storageWriteFailure||storageOverwriteBlocked)&&typeof toast==='function'&&!storageWarningShown){storageWarningShown=true;toast(t(storageOverwriteBlocked?'storageBlocked':'storageWriteFailed'),{tone:'warning',duration:9000});}
+        return saved;
+      }
+      function readStorage(key) { try { return localStorage.getItem(key); } catch { return null; } }
+      function writeStorage(key, value) { try { localStorage.setItem(key, value); } catch {} }
+      function writeSessionStorage(key, value) { try { sessionStorage.setItem(key, value); } catch {} }
+      function detectLanguage() { if (APP_CONFIG.defaultLanguage === 'ja' || APP_CONFIG.defaultLanguage === 'en') return APP_CONFIG.defaultLanguage; return (navigator.language || '').toLowerCase().startsWith('ja') ? 'ja' : 'en'; }
+      function t(key, vars={}) { let text = translations[language]?.[key] ?? translations.en[key] ?? key; for (const [name,value] of Object.entries(vars)) text = text.replaceAll(`{${name}}`, String(value)); return text; }
+      function id(prefix='id') { return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,8)}`; }
+      function esc(value='') { return String(value).replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c])); }
+      function fmtDateTime(iso) { if (!iso) return '—'; try { return new Intl.DateTimeFormat(language==='ja'?'ja-JP':'en-US',{year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}).format(new Date(iso)); } catch { return iso; } }
+      function fmtTime(iso) { if (!iso) return '—'; try { return new Intl.DateTimeFormat(language==='ja'?'ja-JP':'en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit'}).format(new Date(iso)); } catch { return iso; } }
+      function fmtShortDate(iso) { if (!iso) return '—'; try { return new Intl.DateTimeFormat(language==='ja'?'ja-JP':'en-US',{month:'numeric',day:'numeric'}).format(new Date(iso)); } catch { return iso; } }
+      function todaySessionName() { const d=new Date(); return language==='ja' ? `${d.getMonth()+1}月${d.getDate()}日 受付` : `Check-in ${d.toLocaleDateString('en-US',{month:'short',day:'numeric'})}`; }
+      function activeSession() { return state.sessions.find(s=>s.id===state.activeSessionId && !s.endedAt) || null; }
+      function sessionById(sessionId) { return state.sessions.find(s=>s.id===sessionId) || null; }
+      function personKey(person) { return person.memberId || person.id; }
+      function eventFor(session, personId) { return [...(session.events||[])].reverse().find(e=>e.personId===personId) || null; }
+      function eventActivityResolver(session) {
+        const events=session.events||[], byId=new Map(events.map(e=>[e.id,e])), reversalsByTarget=new Map(), memo=new Map();
+        for(const event of events){if(event.type!=='reversal'||!event.targetEventId)continue;const list=reversalsByTarget.get(event.targetEventId)||[];list.push(event);reversalsByTarget.set(event.targetEventId,list);}
+        const isActive=eventId=>{if(memo.has(eventId))return memo.get(eventId);const event=byId.get(eventId);if(!event){memo.set(eventId,false);return false;}memo.set(eventId,true);const active=!(reversalsByTarget.get(eventId)||[]).some(reversal=>isActive(reversal.id));memo.set(eventId,active);return active;};
+        return {byId,isActive};
+      }
+      function effectivePersonEvents(session,personId){const resolver=eventActivityResolver(session);return (session.events||[]).filter(e=>e.personId===personId&&e.type!=='reversal'&&resolver.isActive(e.id));}
+      function personStatus(session, personId) {
+        const events=effectivePersonEvents(session,personId);
+        if (session.mode==='entryexit') { const movement=events.filter(e=>e.type==='enter'||e.type==='exit');const last=movement.at(-1)||null;return { present:movement.some(e=>e.type==='enter'), inside:last?.type==='enter', last }; }
+        const records=events.filter(e=>e.type==='checkin'||e.type==='checkin-cancel');const last=records.at(-1)||null;return { present:last?.type==='checkin', inside:false, last };
+      }
+      function sessionAttendanceCount(session) { return (session.targetMembers||[]).filter(p=>personStatus(session, personKey(p)).present).length; }
+      function sessionRecordCount(session) { return (session.events||[]).length; }
+      function baseEventFor(session,event){const byId=new Map((session.events||[]).map(e=>[e.id,e]));let current=event,guard=0;while(current?.type==='reversal'&&current.targetEventId&&guard++<50)current=byId.get(current.targetEventId);return current||event;}
+      function activityLabelKey(session,event){if(event.type!=='reversal'){const labels={checkin:'activityCheckin','checkin-cancel':'activityCancel',enter:'activityEnter',exit:'activityExit'};return labels[event.type]||event.type;}const target=(session.events||[]).find(e=>e.id===event.targetEventId);if(target?.type==='reversal')return 'activityUndoAction';const base=baseEventFor(session,event);return base?.type==='enter'?'activityUndoEnter':base?.type==='exit'?'activityUndoExit':base?.type==='checkin-cancel'?'activityUndoAction':'activityUndoCheckin';}
+      function latestActiveAuditEvent(session,personId){const resolver=eventActivityResolver(session);return [...(session.events||[])].reverse().find(e=>e.personId===personId&&resolver.isActive(e.id))||null;}
+      function allGroups() { return [...new Set(state.members.map(m=>m.group?.trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,language==='ja'?'ja':'en')); }
+      function normalizedText(v){ return String(v||'').normalize('NFKC').toLocaleLowerCase(language==='ja'?'ja':'en'); }
+      function hasSampleData(){ return state.members.some(m=>m.sample)||state.sessions.some(s=>s.sample); }
+      function cloneState(value=state){ return typeof structuredClone==='function'?structuredClone(value):JSON.parse(JSON.stringify(value)); }
+      function renderSampleBanner(){ $('#sampleDataBanner').hidden=!hasSampleData(); }
+
+      // Canonical confirmation component.
+      const AppConfirm = (() => {
+        const dialog=$('#appConfirmDialog'), title=$('#appConfirmTitle'), message=$('#appConfirmMessage'), closeButton=$('#appConfirmClose'), cancelButton=$('#appConfirmCancel'), okButton=$('#appConfirmOk');
+        let resolver=null, restoreFocus=null;
+        function finish(result){ if(!dialog.open)return; const r=resolver; resolver=null; dialog.close(); if(restoreFocus instanceof HTMLElement&&restoreFocus.isConnected) restoreFocus.focus({preventScroll:true}); restoreFocus=null; r?.(result); }
+        function ask({title:heading,message:body,confirmLabel,cancelLabel,tone='default'}={}){ if(dialog.open)finish(false); title.textContent=heading||t('confirmTitle'); message.textContent=body||''; cancelButton.textContent=cancelLabel||t('cancel'); okButton.textContent=confirmLabel||t('confirmAction'); okButton.classList.toggle('danger',tone==='danger'); okButton.classList.toggle('primary',tone!=='danger'); restoreFocus=document.activeElement; return new Promise(resolve=>{resolver=resolve;dialog.showModal();requestAnimationFrame(()=>cancelButton.focus({preventScroll:true}));}); }
+        closeButton.addEventListener('click',()=>finish(false)); cancelButton.addEventListener('click',()=>finish(false)); okButton.addEventListener('click',()=>finish(true)); dialog.addEventListener('cancel',e=>{e.preventDefault();finish(false);}); dialog.addEventListener('click',e=>{const r=dialog.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)finish(false);});
+        return Object.freeze({ask});
+      })(); window.AppConfirm=AppConfirm;
+
+      const AppToast = (() => {
+        const root=$('#appToast'), message=$('#appToastMessage'), action=$('#appToastAction'); let timer=0, handler=null;
+        function dismiss(){clearTimeout(timer);timer=0;root.classList.remove('show');handler=null;}
+        function show({message:text='',actionLabel='',onAction=null,duration=3200,tone='default'}={}){clearTimeout(timer);message.textContent=String(text);root.dataset.tone=tone;handler=typeof onAction==='function'?onAction:null;action.textContent=actionLabel||'';action.hidden=!handler||!actionLabel;root.classList.add('show');if(duration>0)timer=setTimeout(dismiss,duration);return Object.freeze({dismiss});}
+        action.addEventListener('click',()=>{const h=handler;dismiss();h?.();}); return Object.freeze({show,dismiss});
+      })(); window.AppToast=AppToast;
+      const toast=(message,options={})=>AppToast.show({message,...options});
+
+      function applyLanguage(){
+        document.documentElement.lang=language;
+        $$('[data-i18n]').forEach(el=>el.textContent=t(el.dataset.i18n));
+        $$('[data-i18n-title]').forEach(el=>el.title=t(el.dataset.i18nTitle));
+        $$('[data-i18n-aria-label]').forEach(el=>el.setAttribute('aria-label',t(el.dataset.i18nAriaLabel)));
+        $$('[data-i18n-placeholder]').forEach(el=>el.setAttribute('placeholder',t(el.dataset.i18nPlaceholder)));
+        $('#languageButton').textContent=language==='ja'?'EN':'日本語'; $('#languageButton').setAttribute('aria-label',language==='ja'?'英語に切り替え':'Switch to Japanese');
+        document.title=language==='ja'?APP_CONFIG.nameJa:APP_CONFIG.name; $('#brandName').textContent=language==='ja'?APP_CONFIG.nameJa:APP_CONFIG.name; $('#footerName').textContent=language==='ja'?APP_CONFIG.nameJa:APP_CONFIG.name;
+        $('#sessionModeHelp').textContent=t(sessionModeDraft==='entryexit'?'modeEntryExitHelp':'modeCheckinHelp');
+        renderAll(); updateCsvFormatExample(); if(pendingCsvImport)renderCsvPreview();
+      }
+      function showPage(key){ currentPage=key; $$('.app-mobile-page').forEach(p=>{p.classList.toggle('is-active-desktop',p.dataset.page===key);p.classList.toggle('is-mobile-active',p.dataset.page===key);}); $$('[data-page-key]').forEach(b=>{const active=b.dataset.pageKey===key;b.classList.toggle('is-active',active);if(b.classList.contains('app-mobile-bottom-item')){if(active)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');}}); window.scrollTo({top:0,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'}); }
+
+      function renderAll(){ renderSampleBanner(); renderGroups(); renderReception(); renderRoster(); renderHistory(); renderData(); }
+      function renderGroups(){ const groups=allGroups(); const selects=[$('#rosterGroupFilter'),$('#sessionTargetGroup')]; for(const select of selects){const value=select.value; const first=select===selects[0]?`<option value="">${esc(t('allGroups'))}</option>`:`<option value="">${esc(t('allMembers'))}</option>`; select.innerHTML=first+groups.map(g=>`<option value="${esc(g)}">${esc(g)}</option>`).join(''); if([...select.options].some(o=>o.value===value))select.value=value;} updateSessionTargetPreview(); }
+
+      function renderReceptionGroupFilter(session){
+        const select=$('#receptionGroupFilter'); if(!select||!session)return;
+        const value=receptionGroupFilter;
+        const groups=[...new Set((session.targetMembers||[]).map(p=>p.group?.trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,language==='ja'?'ja':'en'));
+        const hasUngrouped=(session.targetMembers||[]).some(p=>!p.group?.trim());
+        select.innerHTML=`<option value="">${esc(t('allGroups'))}</option>`+groups.map(g=>`<option value="${esc(g)}">${esc(g)}</option>`).join('')+(hasUngrouped?`<option value="__ungrouped__">${esc(t('noGroup'))}</option>`:'');
+        if([...select.options].some(o=>o.value===value))select.value=value;else{receptionGroupFilter='';select.value='';}
+      }
+      function visibleReceptionPeople(session){
+        const q=normalizedText($('#receptionSearch').value);
+        return (session.targetMembers||[]).filter(p=>{
+          const st=personStatus(session,personKey(p));
+          const filterOk=receptionFilter==='all'||(receptionFilter==='present'?st.present:!st.present);
+          const groupOk=!receptionGroupFilter||(receptionGroupFilter==='__ungrouped__'?!p.group?.trim():p.group===receptionGroupFilter);
+          const queryOk=!q||normalizedText([p.name,p.externalId,p.group].join(' ')).includes(q);
+          return filterOk&&groupOk&&queryOk;
+        });
+      }
+      function updateReceptionSearchHint(session,filtered){
+        const hint=$('#receptionSearchHint'); if(!hint)return;
+        const q=$('#receptionSearch').value.trim(); let text=''; let ready=false;
+        if(q&&filtered.length===1){const p=filtered[0],st=personStatus(session,personKey(p));if(session.mode==='entryexit'){text=t('enterToToggle',{name:p.name,action:t(st.inside?'exit':'enter')});ready=true;}else if(!st.present){text=t('enterToCheckIn',{name:p.name});ready=true;}else{text=t('alreadyCheckedIn');}}
+        hint.textContent=text;hint.classList.toggle('is-ready',ready);
+      }
+      function renderReception(){
+        const session=activeSession();
+        if(!session&&receptionFocus)setReceptionFocus(false,{skipRender:true});
+        document.body.classList.toggle('reception-focus',Boolean(session&&receptionFocus));
+        $('#receptionEmpty').classList.toggle('hidden',!!session); $('#activeSession').classList.toggle('hidden',!session);
+        if(!session){ const hasRoster=state.members.length>0; $('#receptionTitle').textContent=t(hasRoster?'noActiveSession':'noRosterForReception'); $('#receptionEmptyText').textContent=t(hasRoster?'noActiveSessionBody':'noRosterForReceptionBody'); $('#startSessionButton').disabled=false; $('#startSessionButton').querySelector('span').textContent=t(hasRoster?'startReception':'addMember'); $('#receptionSearchHint').textContent=''; }
+        if(session){
+          $('#activeSessionName').textContent=session.name; $('#activeSessionMode').textContent=session.mode==='entryexit'?t('modeEntryExitLabel'):t('modeCheckinLabel'); $('#activeSessionStarted').textContent=t('started',{time:fmtDateTime(session.startedAt)});
+          const people=session.targetMembers||[]; const present=people.filter(p=>personStatus(session,personKey(p)).present).length; const pending=people.length-present;
+          $('#metricTarget').textContent=people.length; $('#metricPresent').textContent=present; $('#metricPending').textContent=pending; $('#metricRate').textContent=people.length?`${Math.round(present/people.length*100)}%`:'0%'; $('#pendingCountPill').textContent=pending; $('#presentCountPill').textContent=present;
+          renderReceptionGroupFilter(session); const filtered=visibleReceptionPeople(session);
+          $('#receptionNoResults').classList.toggle('hidden',filtered.length>0); $('#receptionMemberList').innerHTML=filtered.map(p=>receptionPersonHtml(session,p)).join(''); updateReceptionSearchHint(session,filtered); renderRecentActivity(session);
+        }
+        renderSessionLists();
+      }
+
+      function receptionPersonHtml(session,p){ const key=personKey(p), st=personStatus(session,key); const meta=[p.externalId,p.group].filter(Boolean).map(esc); const walk=p.isWalkIn?`<span class="tag walkin">${esc(t('walkIn'))}</span>`:''; let action=''; let status='';
+        if(session.mode==='entryexit'){ action=`<button class="button ${st.inside?'':'primary'} check-action" type="button" data-entry-toggle="${esc(key)}">${esc(st.inside?t('exit'):t('enter'))}</button>`; if(st.last)status=`<span class="${st.inside?'checked-time':''}">${esc(st.inside?t('inside'):t('outside'))} · ${esc(fmtTime(st.last.at))}</span>`; }
+        else if(st.present){ status=`<span class="checked-time">${esc(t('checkedAt',{time:fmtTime(st.last?.at)}))}</span>`; action=`<button class="button small check-action" type="button" data-cancel-checkin="${esc(key)}">${esc(t('cancelCheckin'))}</button>`; }
+        else action=`<button class="button primary check-action" type="button" data-checkin="${esc(key)}">${esc(t('checkIn'))}</button>`;
+        return `<div class="member-row"><div class="member-main"><button class="recent-person-button" type="button" data-person-history="${esc(key)}"><span class="member-name-line"><span class="member-name">${esc(p.name)}</span>${walk}${st.present?`<span class="tag success">${esc(t('checkedIn'))}</span>`:''}</span><span class="member-meta">${meta.map(v=>`<span>${v}</span>`).join('')}${status?`<span>${status}</span>`:''}</span></button></div>${action}</div>`; }
+      function currentPersonStatusText(session,personId){const st=personStatus(session,personId);if(session.mode==='entryexit')return st.inside?t('inside'):(st.present?t('outside'):t('notCheckedIn'));return st.present?t('checkedIn'):t('notCheckedIn');}
+      function renderRecentActivity(session){ const events=[...(session.events||[])].slice(-10).reverse(),resolver=eventActivityResolver(session); $('#noRecentActivity').classList.toggle('hidden',events.length>0); $('#recentActivityList').innerHTML=events.map(e=>{const person=(session.targetMembers||[]).find(p=>personKey(p)===e.personId);const latest=latestActiveAuditEvent(session,e.personId);const canRevert=resolver.isActive(e.id)&&latest?.id===e.id;const personName=person?.name||e.personName||'—';return `<div class="recent-item"><span class="recent-time">${esc(fmtTime(e.at))}</span><button class="recent-person-button recent-copy" type="button" data-person-history="${esc(e.personId)}"><strong>${esc(personName)}</strong><span>${esc(t(activityLabelKey(session,e)))}<span class="recent-status">${esc(currentPersonStatusText(session,e.personId))}</span></span></button>${canRevert?`<button class="button small recent-action" type="button" data-revert-event="${esc(e.id)}">${esc(t('revertRecent'))}</button>`:''}</div>`;}).join(''); }
+
+      function renderSessionLists(){ const sessions=[...state.sessions].sort((a,b)=>String(b.startedAt).localeCompare(String(a.startedAt))); const cards=sessions.slice(0,6).map(sessionCardHtml).join(''); $('#recentSessionsList').innerHTML=cards; $('#noSessionsYet').classList.toggle('hidden',sessions.length>0); }
+      function sessionCardHtml(s){ const target=(s.targetMembers||[]).length, present=sessionAttendanceCount(s), pct=target?Math.round(present/target*100):0; const deleteButton=s.endedAt?`<button class="button icon-mini danger" type="button" data-delete-session="${esc(s.id)}" title="${esc(t('deleteSessionTitle'))}" aria-label="${esc(t('deleteSessionTitle'))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h16M9 7V4h6v3M7 7l1 13h8l1-13M10 11v5M14 11v5"/></svg></button>`:''; return `<article class="session-card"><div class="session-card-head"><div><h3>${esc(s.name)}</h3><p>${esc(fmtDateTime(s.startedAt))} · ${esc(s.mode==='entryexit'?t('modeEntryExitLabel'):t('modeCheckinLabel'))} · ${esc(s.endedAt?t('ended',{time:fmtTime(s.endedAt)}):t('ongoing'))}</p></div><div class="session-card-actions"><button class="button small" type="button" data-session-detail="${esc(s.id)}">${esc(t('viewDetails'))}</button>${deleteButton}</div></div><div class="session-progress"><div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div><strong>${present}/${target}</strong></div></article>`; }
+
+      function renderRoster(){ const q=normalizedText($('#rosterSearch').value), group=$('#rosterGroupFilter').value; const members=state.members.filter(m=>(!group||m.group===group)&&(!q||normalizedText([m.name,m.externalId,m.group,m.note].join(' ')).includes(q))).sort((a,b)=>a.name.localeCompare(b.name,language==='ja'?'ja':'en')); const hasRoster=state.members.length>0,hasMatches=members.length>0; $('#rosterCount').textContent=state.members.length; $('#rosterEmpty').classList.toggle('hidden',hasRoster); $('#rosterNoResults').classList.toggle('hidden',!hasRoster||hasMatches); $('#rosterTable').classList.toggle('hidden',!hasRoster||!hasMatches); $('#rosterTableBody').innerHTML=members.map(m=>`<tr><td><strong>${esc(m.name)}</strong></td><td>${esc(m.externalId||'—')}</td><td>${m.group?`<span class="tag">${esc(m.group)}</span>`:'—'}</td><td>${esc(m.note||'—')}</td><td><div class="roster-actions"><button class="button icon-mini" type="button" data-edit-member="${esc(m.id)}" title="${esc(t('edit'))}" aria-label="${esc(t('edit'))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 20h4l11-11-4-4L4 16zM13.5 6.5l4 4"/></svg></button><button class="button icon-mini danger" type="button" data-delete-member="${esc(m.id)}" title="${esc(t('delete'))}" aria-label="${esc(t('delete'))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h16M9 7V4h6v3M7 7l1 13h8l1-13M10 11v5M14 11v5"/></svg></button></div></td></tr>`).join(''); }
+
+      function renderHistory(){ const sessions=[...state.sessions].sort((a,b)=>String(b.startedAt).localeCompare(String(a.startedAt))); $('#historyEmpty').classList.toggle('hidden',sessions.length>0); $('#historySessionList').innerHTML=sessions.map(sessionCardHtml).join(''); $('#matrixPanel').classList.toggle('hidden',sessions.length===0); renderMatrix(sessions.slice(0,8).reverse()); }
+      function renderMatrix(sessions){ if(!sessions.length){$('#attendanceMatrix').innerHTML='';return;}const people=new Map();for(const m of state.members)people.set(m.id,{id:m.id,name:m.name});for(const x of sessions){for(const p of x.targetMembers||[]){if(p.isWalkIn||!p.memberId)continue;if(!people.has(p.memberId))people.set(p.memberId,{id:p.memberId,name:p.name});}}const roster=[...people.values()].sort((a,b)=>a.name.localeCompare(b.name,language==='ja'?'ja':'en'));let html='<thead><tr><th>'+esc(t('name'))+'</th>'+sessions.map(x=>`<th title="${esc(x.name)}">${esc(fmtShortDate(x.startedAt))}</th>`).join('')+'</tr></thead><tbody>';for(const m of roster){html+=`<tr><td>${esc(m.name)}</td>`;for(const x of sessions){const snap=(x.targetMembers||[]).find(p=>p.memberId===m.id);if(!snap)html+='<td title="'+esc(t('notTarget'))+'">·</td>';else{const present=personStatus(x,m.id).present;html+=present?`<td class="present" title="${esc(t('presentMark'))}">✓</td>`:`<td class="absent" title="${esc(t('absentMark'))}">–</td>`;}}html+='</tr>';}html+='</tbody>';$('#attendanceMatrix').innerHTML=html;}
+
+      function renderData(){ const eventCount=state.sessions.reduce((n,s)=>n+sessionRecordCount(s),0); const bytes=new Blob([JSON.stringify(state)]).size; $('#dataMemberCount').textContent=state.members.length; $('#dataSessionCount').textContent=state.sessions.length; $('#dataEventCount').textContent=eventCount; $('#dataStorageSize').textContent=bytes<1024?`${bytes} B`:`${(bytes/1024).toFixed(bytes>10240?0:1)} KB`; $('#exportRosterButton').disabled=!state.members.length; $('#exportAttendanceButton').disabled=!state.sessions.length; const restoreSample=$('#restoreSampleButton'); if(restoreSample){restoreSample.disabled=hasSampleData();restoreSample.title=hasSampleData()?t('sampleAlreadyVisible'):'';} const warning=$('#storageWarning');if(warning){const key=storageOverwriteBlocked?'storageReadFailed':storageWriteFailure?'storageWriteFailed':'';warning.classList.toggle('hidden',!key);warning.textContent=key?t(key):'';} }
+
+      function openMemberDialog(member=null){ $('#editingMemberId').value=member?.id||''; $('#memberDialogTitle').textContent=t(member?'memberDialogEdit':'memberDialogAdd'); $('#memberNameInput').value=member?.name||''; $('#memberExternalIdInput').value=member?.externalId||''; $('#memberGroupInput').value=member?.group||''; $('#memberNoteInput').value=member?.note||''; const hint=$('#memberSnapshotHint');if(hint)hint.classList.toggle('hidden',!(member&&activeSession())); $('#memberDialog').showModal(); requestAnimationFrame(()=>$('#memberNameInput').focus()); }
+      function closeDialog(id){ const d=$(id); if(d?.open)d.close(); }
+      function submitMember(e){ e.preventDefault(); const name=$('#memberNameInput').value.trim(); if(!name)return; const editing=$('#editingMemberId').value; const before=editing?structuredClone(state.members.find(m=>m.id===editing)):null; const data={name,externalId:$('#memberExternalIdInput').value.trim(),group:$('#memberGroupInput').value.trim(),note:$('#memberNoteInput').value.trim()}; if(editing){const m=state.members.find(m=>m.id===editing);Object.assign(m,data,{sample:false,updatedAt:new Date().toISOString()});} else state.members.push({id:id('member'),...data,sample:false,createdAt:new Date().toISOString()}); closeDialog('#memberDialog'); persist(); toast(t(editing?'memberSaved':'memberAdded'),{tone:'success',actionLabel:editing&&before?t('undo'):'',onAction:editing&&before?()=>{const idx=state.members.findIndex(m=>m.id===before.id);if(idx>=0)state.members[idx]=before;persist();}:null}); }
+      async function deleteMember(memberId){ const m=state.members.find(x=>x.id===memberId); if(!m)return; const ok=await AppConfirm.ask({title:t('deleteMemberTitle'),message:t('deleteMemberMessage',{name:m.name}),confirmLabel:t('delete'),cancelLabel:t('cancel'),tone:'danger'}); if(!ok)return; const index=state.members.findIndex(x=>x.id===memberId); const removed=state.members.splice(index,1)[0]; persist(); toast(t('memberDeleted'),{actionLabel:t('undo'),duration:5000,onAction:()=>{state.members.splice(Math.min(index,state.members.length),0,removed);persist();toast(t('memberRestored'));}}); }
+
+      function setReceptionFocus(enabled,{skipRender=false}={}){receptionFocus=Boolean(enabled&&activeSession());writeSessionStorage(FOCUS_KEY,receptionFocus?'1':'0');document.body.classList.toggle('reception-focus',receptionFocus);if(receptionFocus)showPage('reception');if(!skipRender)renderAll();if(receptionFocus)requestAnimationFrame(()=>$('#receptionSearch')?.focus({preventScroll:true}));}
+      function afterReceptionAction(){const input=$('#receptionSearch');if(input){input.value='';renderReception();}requestAnimationFrame(()=>input?.focus({preventScroll:true}));}
+      function openPersonHistory(personId){const s=activeSession();if(!s)return;const p=(s.targetMembers||[]).find(x=>personKey(x)===personId);if(!p)return;const events=(s.events||[]).filter(e=>e.personId===personId).slice().reverse();$('#personHistoryTitle').textContent=p.name;$('#personHistoryBody').innerHTML=`<div class="person-history-status"><span class="panel-subtitle">${esc(t('currentStatus'))}</span><span class="tag success">${esc(currentPersonStatusText(s,personId))}</span></div><div class="activity-log">${events.map(e=>`<div class="activity-log-row"><span class="activity-log-time">${esc(fmtDateTime(e.at))}</span><div class="activity-log-copy"><strong>${esc(t(activityLabelKey(s,e)))}</strong></div></div>`).join('')||`<div class="inline-note">${esc(t('noHistory'))}</div>`}</div>`;$('#personHistoryDialog').showModal();}
+      function openSessionDialog(){ if(!state.members.length)return; sessionModeDraft='checkin'; $$('#sessionModePicker [data-session-mode]').forEach(b=>b.classList.toggle('is-active',b.dataset.sessionMode==='checkin')); $('#sessionModeHelp').textContent=t('modeCheckinHelp'); $('#sessionNameInput').value=todaySessionName(); $('#sessionTargetGroup').value=''; updateSessionTargetPreview(); $('#sessionDialog').showModal(); requestAnimationFrame(()=>$('#sessionNameInput').select()); }
+      function updateSessionTargetPreview(){ if(!$('#sessionTargetGroup'))return; const group=$('#sessionTargetGroup').value; const count=state.members.filter(m=>!group||m.group===group).length; $('#sessionTargetPreview').textContent=count?t('targetPreview',{count}):t('noTargetMembers'); }
+      function submitSession(e){ e.preventDefault(); const group=$('#sessionTargetGroup').value; const members=state.members.filter(m=>!group||m.group===group); if(!members.length)return; const session={id:id('session'),name:$('#sessionNameInput').value.trim()||todaySessionName(),mode:sessionModeDraft,targetGroup:group||null,startedAt:new Date().toISOString(),endedAt:null,targetMembers:members.map(m=>({memberId:m.id,name:m.name,externalId:m.externalId||'',group:m.group||'',isWalkIn:false})),events:[]}; state.sessions.push(session);state.activeSessionId=session.id;closeDialog('#sessionDialog');receptionFilter='pending';receptionGroupFilter='';persist();showPage('reception');toast(t('sessionStarted'),{tone:'success'}); }
+      async function endSession(){ const s=activeSession();if(!s)return;const ok=await AppConfirm.ask({title:t('endSessionTitle'),message:t('endSessionMessage',{name:s.name}),confirmLabel:t('endReception'),cancelLabel:t('cancel')});if(!ok)return;s.endedAt=new Date().toISOString();state.activeSessionId=null;setReceptionFocus(false,{skipRender:true});persist();toast(t('sessionEnded'),{tone:'success',actionLabel:t('viewHistory'),duration:6500,onAction:()=>showPage('history')}); }
+      function reopenSession(sessionId){ const target=sessionById(sessionId);if(!target)return; const current=activeSession(); if(current&&current.id!==target.id){toast(language==='ja'?'先に現在の受付を終了してください。':'End the current check-in first.',{tone:'warning'});return;} target.endedAt=null;state.activeSessionId=target.id;receptionGroupFilter='';persist();showPage('reception');toast(t('sessionReopened'),{tone:'success'}); }
+      function openSessionNameDialog(sessionId){const x=sessionById(sessionId);if(!x)return;$('#editingSessionId').value=x.id;$('#editingSessionNameInput').value=x.name||todaySessionName();$('#sessionNameDialog').showModal();requestAnimationFrame(()=>$('#editingSessionNameInput').select());}
+      function submitSessionName(e){e.preventDefault();const x=sessionById($('#editingSessionId').value);if(!x)return;const name=$('#editingSessionNameInput').value.trim();if(!name)return;const before=x.name;x.name=name;x.sample=false;closeDialog('#sessionNameDialog');persist();toast(t('sessionNameSaved'),{tone:'success',actionLabel:t('undo'),duration:6000,onAction:()=>{const target=sessionById(x.id);if(target){target.name=before;persist();}}});}
+
+      function removeEventForImmediateUndo(sessionId,eventId){const session=sessionById(sessionId);if(!session)return false;const events=session.events||[],index=events.findIndex(e=>e.id===eventId);if(index<0||events.some(e=>e.type==='reversal'&&e.targetEventId===eventId))return false;events.splice(index,1);persist();afterReceptionAction();return true;}
+      function appendReversal(session,targetEventId,{showToast=true}={}){const target=(session.events||[]).find(e=>e.id===targetEventId);if(!target)return null;const resolver=eventActivityResolver(session);if(!resolver.isActive(target.id))return null;const reversal={id:id('event'),personId:target.personId,personName:target.personName,type:'reversal',targetEventId:target.id,targetType:target.type,at:new Date().toISOString()};session.events.push(reversal);persist();if(showToast)toast(t('activityReverted'),{tone:'success',actionLabel:t('undo'),duration:6000,onAction:()=>{if(removeEventForImmediateUndo(session.id,reversal.id))toast(t('activityRestored'),{tone:'success'});}});return reversal;}
+      function addEvent(personId,type){ const s=activeSession();if(!s)return;const p=(s.targetMembers||[]).find(x=>personKey(x)===personId);if(!p)return;const event={id:id('event'),personId,personName:p.name,type,at:new Date().toISOString()};s.events.push(event);persist();afterReceptionAction();toast(t('recorded'),{tone:'success',actionLabel:t('undo'),duration:6000,onAction:()=>{if(removeEventForImmediateUndo(s.id,event.id))toast(t('recordUndone'),{tone:'success'});}}); }
+      async function cancelCheckin(personId){ const s=activeSession();if(!s)return;const p=(s.targetMembers||[]).find(x=>personKey(x)===personId);if(!p)return;const st=personStatus(s,personId);if(!st.present||!st.last)return;const ok=await AppConfirm.ask({title:t('cancelCheckinTitle'),message:t('cancelCheckinMessage',{name:p.name}),confirmLabel:t('cancelCheckin'),cancelLabel:t('cancel'),tone:'danger'});if(!ok)return;const reversal=appendReversal(s,st.last.id,{showToast:false});if(reversal){afterReceptionAction();toast(t('checkinCancelled'),{tone:'success',actionLabel:t('undo'),duration:6000,onAction:()=>{if(removeEventForImmediateUndo(s.id,reversal.id))toast(t('activityRestored'),{tone:'success'});}});} }
+      function revertRecentEvent(eventId){const s=activeSession();if(!s)return;const event=(s.events||[]).find(e=>e.id===eventId);if(!event)return;const latest=latestActiveAuditEvent(s,event.personId);if(latest?.id!==event.id)return;appendReversal(s,event.id);afterReceptionAction();}
+      function toggleEntry(personId){ const s=activeSession();if(!s)return;const st=personStatus(s,personId);addEvent(personId,st.inside?'exit':'enter'); }
+      function openWalkIn(){ if(!activeSession())return;$('#walkInNameInput').value='';$('#walkInAddRoster').checked=false;$('#walkInDialog').showModal();requestAnimationFrame(()=>$('#walkInNameInput').focus()); }
+      function submitWalkIn(e){e.preventDefault();const s=activeSession();const name=$('#walkInNameInput').value.trim();if(!s||!name)return;let rosterMember=null;if($('#walkInAddRoster').checked){rosterMember={id:id('member'),name,externalId:'',group:'',note:'',sample:false,createdAt:new Date().toISOString()};state.members.push(rosterMember);} const snap=rosterMember?{memberId:rosterMember.id,name,externalId:'',group:'',isWalkIn:false}:{id:id('walkin'),memberId:null,name,externalId:'',group:'',isWalkIn:true};s.targetMembers.push(snap);closeDialog('#walkInDialog');persist();toast($('#walkInAddRoster').checked?t('rosterAlsoAdded'):t('walkInAdded'),{tone:'success'});}
+
+      function showSessionDetail(sessionId){ const x=sessionById(sessionId);if(!x)return;$('#sessionDetailTitle').textContent=x.name;const target=(x.targetMembers||[]).length,present=sessionAttendanceCount(x),walkIns=(x.targetMembers||[]).filter(p=>p.isWalkIn).length;const people=(x.targetMembers||[]).map(p=>{const st=personStatus(x,personKey(p));return `<div class="member-row"><div class="member-main"><div class="member-name-line"><span class="member-name">${esc(p.name)}</span>${p.isWalkIn?`<span class="tag walkin">${esc(t('walkInOnly'))}</span>`:''}</div><div class="member-meta">${p.group?`<span>${esc(p.group)}</span>`:''}${st.last?`<span>${esc(fmtDateTime(st.last.at))}</span>`:''}</div></div><span class="tag ${st.present?'success':''}">${esc(st.present?t('presentMark'):t('absentMark'))}</span></div>`;}).join('');const activity=[...(x.events||[])].reverse().map(e=>`<div class="activity-log-row"><span class="activity-log-time">${esc(fmtDateTime(e.at))}</span><div class="activity-log-copy"><strong>${esc(e.personName||'—')}</strong><span>${esc(t(activityLabelKey(x,e)))}</span></div></div>`).join('');$('#sessionDetailBody').innerHTML=`<div class="metric-grid" style="margin-bottom:16px"><div class="metric"><strong>${target}</strong><span>${esc(t('targetPeople'))}</span></div><div class="metric"><strong>${present}</strong><span>${esc(t('checkedIn'))}</span></div><div class="metric"><strong>${walkIns}</strong><span>${esc(t('walkInCount'))}</span></div><div class="metric"><strong>${target?Math.round(present/target*100):0}%</strong><span>${esc(t('attendanceRate'))}</span></div></div><div class="button-row" style="margin-bottom:14px"><button class="button" type="button" data-edit-session-name="${esc(x.id)}">${esc(t('editSessionName'))}</button><button class="button" type="button" data-export-session-csv="${esc(x.id)}">${esc(t('sessionCsv'))}</button>${x.endedAt&&!activeSession()?`<button class="button soft" type="button" data-reopen-session="${esc(x.id)}">${esc(t('reopen'))}</button>`:''}</div><h3>${esc(t('sessionDetailPeople'))}</h3><div class="member-list">${people||`<div class="inline-note">${esc(t('noHistory'))}</div>`}</div><h3 style="margin-top:18px">${esc(t('sessionActivityLog'))}</h3><div class="activity-log">${activity||`<div class="inline-note">${esc(t('noHistory'))}</div>`}</div>`;$('#sessionDetailDialog').showModal();}
+
+      function csvEscape(v){const z=String(v??'');return /[",\n\r]/.test(z)?`"${z.replaceAll('"','""')}"`:z;}
+      function safeFilenameBase(value){return String(value||'check-in').normalize('NFKC').replace(/[\\/:*?"<>|]+/g,'-').replace(/\s+/g,' ').trim().slice(0,80)||'check-in';}
+      function download(filename,content,type='text/plain;charset=utf-8'){const url=URL.createObjectURL(new Blob([content],{type}));const a=document.createElement('a');a.href=url;a.download=filename;a.click();setTimeout(()=>URL.revokeObjectURL(url),0);toast(t('downloaded'),{tone:'success'});}
+      function parseCsv(text){const rows=[];let row=[],cell='',q=false;for(let i=0;i<text.length;i++){const c=text[i],n=text[i+1];if(q){if(c==='"'&&n==='"'){cell+='"';i++;}else if(c==='"')q=false;else cell+=c;}else{if(c==='"')q=true;else if(c===','){row.push(cell);cell='';}else if(c==='\n'){row.push(cell);rows.push(row);row=[];cell='';}else if(c!=='\r')cell+=c;}}if(q)throw new Error('unclosed quote');row.push(cell);if(row.some(v=>v!==''))rows.push(row);return rows;}
+      function buildDuplicateIndexes(){const ids=new Map(),names=new Map();for(const m of state.members){const ik=normalizedText(m.externalId),nk=normalizedText(m.name);if(ik&&!ids.has(ik))ids.set(ik,m);if(nk&&!names.has(nk))names.set(nk,m);}return {ids,names};}
+      function duplicateReason(c,indexes){const ik=normalizedText(c.externalId),nk=normalizedText(c.name);if(ik&&indexes.ids.has(ik)){const e=indexes.ids.get(ik);return normalizedText(e.name)===nk?'id':'id-conflict';}if(nk&&indexes.names.has(nk)){const e=indexes.names.get(nk),ei=normalizedText(e.externalId);return ik&&ei&&ik!==ei?'name-conflict':'name';}return '';}
+      function rememberDuplicateCandidate(c,indexes){const ik=normalizedText(c.externalId),nk=normalizedText(c.name);if(ik&&!indexes.ids.has(ik))indexes.ids.set(ik,c);if(nk&&!indexes.names.has(nk))indexes.names.set(nk,c);}
+      function analyzeRosterCsv(text){const rows=parseCsv(String(text||'').replace(/^﻿/,''));if(!rows.length)throw new Error('empty');const headers=rows[0].map(v=>normalizedText(v.trim()));const known=headers.some(h=>['name','名前','氏名'].includes(h));const start=known?1:0;if(rows.length-start>5000)throw new Error('too-many');const idx={name:known?headers.findIndex(h=>['name','名前','氏名'].includes(h)):0,id:known?headers.findIndex(h=>['id','member id','会員id','社員番号'].includes(h)):-1,group:known?headers.findIndex(h=>['group','グループ','所属'].includes(h)):-1,note:known?headers.findIndex(h=>['note','メモ','備考'].includes(h)):-1};const candidates=[],indexes=buildDuplicateIndexes();let skipped=0;for(const r of rows.slice(start)){const name=(r[idx.name]||'').trim(),externalId=idx.id>=0?(r[idx.id]||'').trim():'',group=idx.group>=0?(r[idx.group]||'').trim():'',note=idx.note>=0?(r[idx.note]||'').trim():'';if(!name||name.length>120||externalId.length>80||group.length>80||note.length>500){skipped++;continue;}const c={name,externalId,group,note,duplicateReason:''};c.duplicateReason=duplicateReason(c,indexes);candidates.push(c);rememberDuplicateCandidate(c,indexes);}return {candidates,skipped};}
+      function duplicateLabel(reason){return reason==='id-conflict'?t('csvIdConflict'):reason==='name-conflict'?t('csvNameConflict'):reason==='id'?t('csvDuplicateId'):reason==='name'?t('csvDuplicateName'):t('csvDuplicateTag');}
+      function renderCsvPreview(){if(!pendingCsvImport)return;const include=$('#csvIncludeDuplicates').checked;const duplicates=pendingCsvImport.candidates.filter(c=>c.duplicateReason).length;const planned=pendingCsvImport.candidates.filter(c=>include||!c.duplicateReason).length;$('#csvPlannedCount').textContent=planned;$('#csvDuplicateCount').textContent=duplicates;$('#csvSkippedCount').textContent=pendingCsvImport.skipped;const preview=pendingCsvImport.candidates.slice(0,10);$('#csvPreviewList').innerHTML=preview.map(c=>`<div class="csv-preview-row"><div><strong>${esc(c.name)}</strong><span>${esc([c.externalId,c.group].filter(Boolean).join(' · ')||'—')}</span></div>${c.duplicateReason?`<span class="tag walkin">${esc(duplicateLabel(c.duplicateReason))}</span>`:''}</div>`).join('')+(pendingCsvImport.candidates.length>10?`<div class="csv-preview-more">${esc(t('csvMoreRows',{count:pendingCsvImport.candidates.length-10}))}</div>`:'');$('#confirmCsvImportButton').disabled=planned===0;}
+      function closeCsvPreview(){if($('#csvPreviewDialog').open)$('#csvPreviewDialog').close();pendingCsvImport=null;$('#rosterCsvInput').value='';$('#csvIncludeDuplicates').checked=false;}
+      function importRosterCsv(file){const reader=new FileReader();reader.onload=()=>{try{const result=analyzeRosterCsv(reader.result);if(!result.candidates.length){toast(t('csvNoRows'),{tone:'warning'});$('#rosterCsvInput').value='';return;}pendingCsvImport=result;$('#csvIncludeDuplicates').checked=false;renderCsvPreview();$('#csvPreviewDialog').showModal();}catch(error){toast(t(error?.message==='too-many'?'csvRowsLimit':'csvInvalid'),{tone:'warning'});$('#rosterCsvInput').value='';}};reader.onerror=()=>{toast(t('csvInvalid'),{tone:'warning'});$('#rosterCsvInput').value='';};reader.readAsText(file);}
+      function confirmCsvImport(){if(!pendingCsvImport)return;const include=$('#csvIncludeDuplicates').checked;const selected=pendingCsvImport.candidates.filter(c=>include||!c.duplicateReason);if(!selected.length)return;for(const c of selected)state.members.push({id:id('member'),name:c.name,externalId:c.externalId,group:c.group,note:c.note,sample:false,createdAt:new Date().toISOString()});const skipped=pendingCsvImport.skipped+(include?0:pendingCsvImport.candidates.filter(c=>c.duplicateReason).length);const added=selected.length;closeCsvPreview();persist();toast(skipped?t('csvPartial',{added,skipped}):t('csvImported',{count:added}),{tone:'success'});}
+
+      function exportRoster(){const rows=[['name','id','group','note'],...state.members.map(m=>[m.name,m.externalId||'',m.group||'',m.note||''])];download('check-in-roster.csv','\ufeff'+rows.map(r=>r.map(csvEscape).join(',')).join('\r\n'),'text/csv;charset=utf-8');}
+      function attendanceRows(sessions){const rows=[['session','started_at','ended_at','mode','name','id','group','walk_in','status','first_record_at','last_record_at']];for(const x of sessions){for(const p of x.targetMembers||[]){const key=personKey(p),events=effectivePersonEvents(x,key),st=personStatus(x,key);rows.push([x.name,x.startedAt,x.endedAt||'',x.mode,p.name,p.externalId||'',p.group||'',p.isWalkIn?'1':'0',st.present?'present':'absent',events[0]?.at||'',events.at(-1)?.at||'']);}}return rows;}
+      function exportAttendance(){const rows=attendanceRows(state.sessions);download('check-in-history.csv','\ufeff'+rows.map(r=>r.map(csvEscape).join(',')).join('\r\n'),'text/csv;charset=utf-8');}
+      function exportSessionAttendance(sessionId){const x=sessionById(sessionId);if(!x)return;const rows=attendanceRows([x]);download(`${safeFilenameBase(x.name)}.csv`,'\ufeff'+rows.map(r=>r.map(csvEscape).join(',')).join('\r\n'),'text/csv;charset=utf-8');}
+      function exportBackup(){download(`check-in-desk-backup-${new Date().toISOString().slice(0,10)}.json`,JSON.stringify({app:'check-in-desk',schemaVersion:SCHEMA_VERSION,exportedAt:new Date().toISOString(),data:state},null,2),'application/json;charset=utf-8');}
+      function importBackup(file){const reader=new FileReader();reader.onload=async()=>{try{const parsed=JSON.parse(String(reader.result||''));if(parsed.app!=='check-in-desk'||!parsed.data||!Array.isArray(parsed.data.members)||!Array.isArray(parsed.data.sessions))throw new Error();const ok=await AppConfirm.ask({title:t('restoreConfirmTitle'),message:t('restoreConfirmMessage'),confirmLabel:t('restoreBackup'),cancelLabel:t('cancel')});if(!ok)return;state=normalizeState(parsed.data);if(!hasSampleData())state.sampleDismissed=true;storageOverwriteBlocked=false;storageReadFailure=false;storageWarningShown=false;persist({force:true});toast(t('backupRestored'),{tone:'success'});}catch{toast(t('backupInvalid'),{tone:'warning'});}finally{$('#backupInput').value='';}};reader.readAsText(file);}
+
+      async function copySummary(){const text=language==='ja'?`Check-in Desk\n登録メンバー: ${state.members.length}人\n受付回数: ${state.sessions.length}回\n受付記録: ${state.sessions.reduce((n,s)=>n+sessionRecordCount(s),0)}件`:`Check-in Desk\nRegistered people: ${state.members.length}\nSessions: ${state.sessions.length}\nRecords: ${state.sessions.reduce((n,s)=>n+sessionRecordCount(s),0)}`;try{await navigator.clipboard.writeText(text);toast(t('copied'));}catch{const ta=document.createElement('textarea');ta.value=text;document.body.appendChild(ta);ta.select();const ok=document.execCommand('copy');ta.remove();toast(t(ok?'copied':'copyFailed'));}}
+      async function clearSampleData(){if(!hasSampleData())return;const ok=await AppConfirm.ask({title:t('clearSampleTitle'),message:t('clearSampleMessage'),confirmLabel:t('clearSample'),cancelLabel:t('cancel')});if(!ok)return;const before=cloneState();const sampleSessionIds=new Set(state.sessions.filter(s=>s.sample).map(s=>s.id));state.members=state.members.filter(m=>!m.sample);state.sessions=state.sessions.filter(s=>!s.sample);if(state.activeSessionId&&sampleSessionIds.has(state.activeSessionId))state.activeSessionId=null;state.sampleDismissed=true;persist();toast(t('sampleCleared'),{tone:'success',actionLabel:t('undo'),duration:6000,onAction:()=>{state=before;persist();}});}
+      function restoreSampleData(){if(hasSampleData()){toast(t('sampleAlreadyVisible'),{tone:'warning'});return;}const before=cloneState(),sample=sampleState(),memberIds=new Set(state.members.map(m=>m.id)),sessionIds=new Set(state.sessions.map(s=>s.id));state.members.push(...sample.members.filter(m=>!memberIds.has(m.id)));state.sessions.push(...sample.sessions.filter(s=>!sessionIds.has(s.id)));state.sampleDismissed=false;persist();toast(t('sampleRestored'),{tone:'success',actionLabel:t('undo'),duration:6000,onAction:()=>{state=before;persist();}});}
+      async function deleteSession(sessionId){const session=sessionById(sessionId);if(!session||!session.endedAt)return;const ok=await AppConfirm.ask({title:t('deleteSessionTitle'),message:t('deleteSessionMessage',{name:session.name}),confirmLabel:t('deleteSessionConfirm'),cancelLabel:t('cancel'),tone:'danger'});if(!ok)return;const index=state.sessions.findIndex(s=>s.id===sessionId),removed=state.sessions.splice(index,1)[0];closeDialog('#sessionDetailDialog');persist();toast(t('sessionDeleted'),{tone:'success',actionLabel:t('undo'),duration:6000,onAction:()=>{state.sessions.splice(Math.min(index,state.sessions.length),0,removed);persist();toast(t('sessionRestored'),{tone:'success'});}});}
+      function updateCsvFormatExample(){const example=$('#csvFormatExample');if(!example)return;example.textContent=language==='ja'?'名前,ID,グループ,メモ\n山田 太郎,001,Aグループ,':'name,id,group,note\nAlex Smith,001,Group A,';}
+      function openCsvFormat(){updateCsvFormatExample();$('#csvFormatDialog').showModal();}
+      function downloadCsvTemplate(){const rows=language==='ja'?[['名前','ID','グループ','メモ'],['山田 太郎','001','Aグループ','']]:[['name','id','group','note'],['Alex Smith','001','Group A','']];download('check-in-roster-template.csv','\ufeff'+rows.map(r=>r.map(csvEscape).join(',')).join('\r\n'),'text/csv;charset=utf-8');}
+      async function resetAll(){const ok=await AppConfirm.ask({title:t('resetConfirmTitle'),message:t('resetConfirmMessage'),confirmLabel:t('resetAll'),cancelLabel:t('cancel'),tone:'danger'});if(!ok)return;state=blankState(true);storageOverwriteBlocked=false;storageReadFailure=false;storageWarningShown=false;persist({force:true});toast(t('resetDone'));}
+
+      // Navigation and language.
+      $$('[data-page-key]').forEach(b=>b.addEventListener('click',()=>showPage(b.dataset.pageKey)));
+      $('#languageButton').addEventListener('click',()=>{language=language==='ja'?'en':'ja';writeStorage(LANGUAGE_KEY,language);applyLanguage();});
+      const helpDialog=$('#helpDialog'); $('#helpButton').addEventListener('click',()=>helpDialog.showModal()); $('#closeHelpButton').addEventListener('click',()=>helpDialog.close()); helpDialog.addEventListener('click',e=>{const r=helpDialog.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)helpDialog.close();});
+
+      // Dialog close behaviors.
+      [['#memberDialog','#closeMemberDialog','#cancelMemberDialog'],['#sessionDialog','#closeSessionDialog','#cancelSessionDialog'],['#sessionNameDialog','#closeSessionNameDialog','#cancelSessionNameDialog'],['#walkInDialog','#closeWalkInDialog','#cancelWalkInDialog'],['#sessionDetailDialog','#closeSessionDetailDialog',null],['#personHistoryDialog','#closePersonHistoryDialog',null]].forEach(([d,c,x])=>{const dialog=$(d);$(c)?.addEventListener('click',()=>dialog.close());$(x)?.addEventListener('click',()=>dialog.close());dialog.addEventListener('click',e=>{const r=dialog.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)dialog.close();});});
+
+      // Forms / direct controls.
+      $('#addMemberButton').addEventListener('click',()=>openMemberDialog()); $('#addFirstMemberButton').addEventListener('click',()=>openMemberDialog()); $('#memberForm').addEventListener('submit',submitMember);
+      $('#startSessionButton').addEventListener('click',()=>state.members.length?openSessionDialog():openMemberDialog()); $('#historyStartButton').addEventListener('click',()=>showPage('reception')); $('#resetRosterFiltersButton').addEventListener('click',()=>{$('#rosterSearch').value='';$('#rosterGroupFilter').value='';renderRoster();}); $('#sessionForm').addEventListener('submit',submitSession); $('#sessionNameForm').addEventListener('submit',submitSessionName); $('#editActiveSessionNameButton').addEventListener('click',()=>{const x=activeSession();if(x)openSessionNameDialog(x.id);}); $('#endSessionButton').addEventListener('click',endSession); $('#addWalkInButton').addEventListener('click',openWalkIn); $('#walkInForm').addEventListener('submit',submitWalkIn);
+      $('#focusReceptionButton').addEventListener('click',()=>setReceptionFocus(true)); $('#exitFocusHeaderButton').addEventListener('click',()=>setReceptionFocus(false));
+      $('#sessionTargetGroup').addEventListener('change',updateSessionTargetPreview); $$('#sessionModePicker [data-session-mode]').forEach(b=>b.addEventListener('click',()=>{sessionModeDraft=b.dataset.sessionMode;$$('#sessionModePicker [data-session-mode]').forEach(x=>x.classList.toggle('is-active',x===b));$('#sessionModeHelp').textContent=t(sessionModeDraft==='entryexit'?'modeEntryExitHelp':'modeCheckinHelp');}));
+      $$('.segment[data-reception-filter]').forEach(b=>b.addEventListener('click',()=>{receptionFilter=b.dataset.receptionFilter;$$('.segment[data-reception-filter]').forEach(x=>x.classList.toggle('is-active',x===b));renderReception();}));
+      $('#receptionSearch').addEventListener('input',renderReception); $('#receptionGroupFilter').addEventListener('change',e=>{receptionGroupFilter=e.target.value;renderReception();});
+      $('#receptionSearch').addEventListener('keydown',e=>{if(e.key!=='Enter')return;const s=activeSession();if(!s)return;const filtered=visibleReceptionPeople(s);if(filtered.length!==1)return;e.preventDefault();const p=filtered[0],key=personKey(p),st=personStatus(s,key);if(s.mode==='entryexit')toggleEntry(key);else if(!st.present)addEvent(key,'checkin');else toast(t('alreadyCheckedIn'),{tone:'warning'});});
+      $('#rosterSearch').addEventListener('input',renderRoster); $('#rosterGroupFilter').addEventListener('change',renderRoster);
+      $('#importRosterButton').addEventListener('click',()=>$('#rosterCsvInput').click()); $('#csvFormatButton').addEventListener('click',openCsvFormat); $('#rosterCsvInput').addEventListener('change',e=>e.target.files[0]&&importRosterCsv(e.target.files[0])); $('#exportRosterButton').addEventListener('click',exportRoster); $('#exportAttendanceButton').addEventListener('click',exportAttendance);
+      $('#csvIncludeDuplicates').addEventListener('change',renderCsvPreview); $('#confirmCsvImportButton').addEventListener('click',confirmCsvImport); $('#closeCsvPreviewDialog').addEventListener('click',closeCsvPreview); $('#cancelCsvPreviewDialog').addEventListener('click',closeCsvPreview); $('#csvPreviewDialog').addEventListener('cancel',e=>{e.preventDefault();closeCsvPreview();}); $('#csvPreviewDialog').addEventListener('click',e=>{const d=$('#csvPreviewDialog'),r=d.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)closeCsvPreview();});
+      $('#exportBackupButton').addEventListener('click',exportBackup); $('#restoreSampleButton').addEventListener('click',restoreSampleData); $('#importBackupButton').addEventListener('click',()=>$('#backupInput').click()); $('#backupInput').addEventListener('change',e=>e.target.files[0]&&importBackup(e.target.files[0])); $('#copySummaryButton').addEventListener('click',copySummary); $('#resetAllButton').addEventListener('click',resetAll);
+      $('#clearSampleButton').addEventListener('click',clearSampleData); $('#downloadCsvTemplateButton').addEventListener('click',downloadCsvTemplate); $('#closeCsvFormatDialog').addEventListener('click',()=>closeDialog('#csvFormatDialog')); $('#closeCsvFormatDialogBottom').addEventListener('click',()=>closeDialog('#csvFormatDialog')); $('#csvFormatDialog').addEventListener('click',e=>{const d=$('#csvFormatDialog'),r=d.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)d.close();});
+
+      document.addEventListener('click',e=>{const edit=e.target.closest('[data-edit-member]');if(edit){openMemberDialog(state.members.find(m=>m.id===edit.dataset.editMember));return;}const del=e.target.closest('[data-delete-member]');if(del){deleteMember(del.dataset.deleteMember);return;}const ck=e.target.closest('[data-checkin]');if(ck){addEvent(ck.dataset.checkin,'checkin');return;}const cancel=e.target.closest('[data-cancel-checkin]');if(cancel){cancelCheckin(cancel.dataset.cancelCheckin);return;}const revert=e.target.closest('[data-revert-event]');if(revert){revertRecentEvent(revert.dataset.revertEvent);return;}const personHistory=e.target.closest('[data-person-history]');if(personHistory){openPersonHistory(personHistory.dataset.personHistory);return;}const toggle=e.target.closest('[data-entry-toggle]');if(toggle){toggleEntry(toggle.dataset.entryToggle);return;}const detail=e.target.closest('[data-session-detail]');if(detail){showSessionDetail(detail.dataset.sessionDetail);return;}const editSessionName=e.target.closest('[data-edit-session-name]');if(editSessionName){closeDialog('#sessionDetailDialog');openSessionNameDialog(editSessionName.dataset.editSessionName);return;}const exportSessionCsv=e.target.closest('[data-export-session-csv]');if(exportSessionCsv){exportSessionAttendance(exportSessionCsv.dataset.exportSessionCsv);return;}const deleteSessionButton=e.target.closest('[data-delete-session]');if(deleteSessionButton){deleteSession(deleteSessionButton.dataset.deleteSession);return;}const reopen=e.target.closest('[data-reopen-session]');if(reopen){closeDialog('#sessionDetailDialog');reopenSession(reopen.dataset.reopenSession);return;}});
+
+      document.addEventListener('keydown',e=>{if(e.key==='Escape'&&receptionFocus&&!document.querySelector('dialog[open]')){const input=$('#receptionSearch');if(input?.value){input.value='';renderReception();input.focus();}else setReceptionFocus(false);return;}if(e.key==='/'&&activeSession()&&!/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement?.tagName||'')){e.preventDefault();$('#receptionSearch')?.focus();}});
+
+      $('#versionBadge').textContent=`v${APP_CONFIG.version}`; applyLanguage(); showPage('reception'); if(storageReadFailure){storageWarningShown=true;toast(t('storageReadFailed'),{tone:'warning',duration:10000});} if(receptionFocus)requestAnimationFrame(()=>$('#receptionSearch')?.focus({preventScroll:true}));
+    })();
+  </script>
+</body>
+</html>

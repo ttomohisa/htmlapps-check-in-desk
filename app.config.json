@@ -1,0 +1,26 @@
+{
+  "$schema": "./schemas/app-config.schema.json",
+  "name": "Check-in Desk",
+  "nameJa": "受付・出欠チェック",
+  "slug": "check-in-desk",
+  "version": "1.0.0",
+  "description": "A fully local reusable-roster check-in and attendance tracker that runs as a single HTML file.",
+  "descriptionJa": "繰り返し使える名簿で受付・出欠・入退室を記録する、完全ローカル処理の単一HTMLツールです。",
+  "defaultLanguage": "auto",
+  "repository": {
+    "owner": "ttomohisa",
+    "name": "htmlapps-check-in-desk"
+  },
+  "build": {
+    "output": "dist/index.html",
+    "blockRuntimeNetwork": true,
+    "selfExtract": {
+      "enabled": true,
+      "output": "dist/index.self-extract.html"
+    },
+    "sizeBudget": {
+      "readableWarningMb": 5,
+      "selfExtractWarningMb": 2
+    }
+  }
+}
