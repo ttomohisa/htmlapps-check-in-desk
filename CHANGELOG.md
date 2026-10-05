@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+- Add Export shown CSV with filtered snapshot rows, displayed count, editable filename, and safe cancel / session replacement behavior.
+- Fix literal `__ungrouped__` group names colliding with No group in reception filters, without changing stored data.
+- Extend bilingual regression coverage to filtered CSV contents, snapshot ownership, cancellation, filenames, legacy exports, and the decompressed self-extract release.
+
 - Reset reception search and filters when starting or reopening a session, and keep visible filter selection and accessible pressed state synchronized.
 - Ignore IME composition-confirmation and auto-repeated Enter so text entry cannot accidentally record attendance or toggle Entry / Exit.
 - Add bilingual regression tests for session transitions, filter state, keyboard guards, normal check-in, Entry / Exit, focus, and immediate Undo across source and standalone downloads.

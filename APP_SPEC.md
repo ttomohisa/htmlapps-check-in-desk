@@ -38,6 +38,11 @@ A successful session lets the user keep one roster, start a named check-in, reco
 - Per-person active-session history from the reception list / Recent activity, including current status.
 - Session detail view, recent activity, history list, and recent-session attendance matrix. Completed sessions can be deleted individually with confirmation and immediate Undo.
 - Attendance-history CSV export.
+- Export shown CSV (N) from the active reception: include only the intersection of the visible status, group and normalized search filters, in displayed snapshot order, including session-only walk-ins. Disable the action with no active reception or zero results.
+- The shown-export dialog captures rows when opened, shows the count and lets the operator edit a sanitized `.csv` filename. Cancel, close, Escape and backdrop dismiss without downloading. Reopening uses fresh rows and keeps the edited filename within the same session. Ending, replacing, resetting or restoring a session invalidates its pending export, even when a restored session has the same ID.
+- Shown CSV retains the existing 11 attendance columns, UTF-8 BOM, CRLF records and CSV quoting. It never mutates attendance or the roster. Existing all-history and per-session exports remain full-scope.
+- In Entry / Exit mode, Checked in / `present` means at least one effective entry, including a person who later exited; the new export preserves this meaning.
+- Reception group selectors distinguish a literal `__ungrouped__` group (and any other actual name) from the synthetic No group option without changing stored group values or schema.
 - JSON full backup/restore with replace confirmation.
 - Full-data reset with destructive confirmation.
 - Japanese and English in the same HTML.
@@ -83,7 +88,8 @@ Current Chrome and Edge are the primary release targets. Firefox and Safari are 
 
 ## 10. Acceptance criteria
 
-- Both standalone variants build and repository verification passes.
+- Both standalone variants build and repository verification passes. Reception regression tests execute the source, readable release, root download and decompressed self-extract release.
+- Shown CSV matches combined filters, snapshot order, walk-in and Entry / Exit semantics; filename editing, CSV escaping, dismissal, stale-session cancellation, repeated submit and legacy full-scope exports are covered.
 - CSP retains `connect-src 'none'`; there are no runtime external dependencies.
 - Roster persists after reload and can be backed up / restored.
 - Starting, recording, ending, and reopening sessions works.
