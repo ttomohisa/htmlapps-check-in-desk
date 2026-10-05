@@ -80,6 +80,8 @@ Before changing the roster, the import review shows:
 
 Possible duplicates are excluded by default unless you explicitly include them. Up to 5,000 people can be imported in one CSV operation. The same format guide and a downloadable template are available from the info icon beside CSV import.
 
+Starting or reopening a session clears the reception search and group filter and shows Pending. The selected filter is also announced to assistive technology. IME composition confirmation and holding Enter do not record attendance; press Enter again deliberately after confirming the text.
+
 ### Keyboard shortcuts
 
 | Shortcut | Action |
@@ -144,6 +146,8 @@ Run the repository checks:
 ```powershell
 ./scripts/check-repository.ps1
 ```
+
+Repository checks require Node.js 18+ for dependency-free reception regressions. They exercise the source, built HTML, and root download in Japanese and English. To run just these tests after building: `node tests/reception-controls.test.mjs`.
 
 Open the generated app with the included helper:
 

@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+- Reset reception search and filters when starting or reopening a session, and keep visible filter selection and accessible pressed state synchronized.
+- Ignore IME composition-confirmation and auto-repeated Enter so text entry cannot accidentally record attendance or toggle Entry / Exit.
+- Add bilingual regression tests for session transitions, filter state, keyboard guards, normal check-in, Entry / Exit, focus, and immediate Undo across source and standalone downloads.
+
 ## [1.0.0] - 2026-09-03
 
 - Promoted the release candidate to the first stable release after full repository, data-flow, privacy, responsive-layout, and standalone-output review.

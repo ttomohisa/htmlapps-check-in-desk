@@ -30,9 +30,9 @@ A successful session lets the user keep one roster, start a named check-in, reco
 - Multiple persistent reception sessions with immutable participant snapshots.
 - Check-in mode: record one current attendance state, with explicit cancellation.
 - Entry / Exit mode: record repeated enter/exit events chronologically.
-- Active-session filters for Pending / Checked in / All, group filtering, and fast name/ID/group search.
+- Active-session filters for Pending / Checked in / All, group filtering, and fast name/ID/group search. Starting or reopening a session clears search and group filters and selects Pending; ordinary rerenders within the same session preserve these controls. Visual selection and `aria-pressed` are rendered from the same filter state.
 - Focused reception view for front-desk operation, with management tabs and mobile navigation hidden until the operator exits the view.
-- Keyboard fast path: when exactly one actionable search result remains, Enter records the check-in / entry / exit and returns focus to the search field.
+- Keyboard fast path: when exactly one actionable search result remains, Enter records the check-in / entry / exit and returns focus to the search field. Composition-confirmation Enter (`isComposing` or legacy key code 229) and auto-repeated Enter must not record, clear search, or prevent text composition. A later deliberate Enter remains available.
 - Walk-in registration per session, optionally promoted into the reusable roster.
 - End and reopen a session.
 - Per-person active-session history from the reception list / Recent activity, including current status.
