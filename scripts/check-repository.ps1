@@ -225,6 +225,11 @@ $buildArguments = @{}
 if ($ForceDownload) { $buildArguments.ForceDownload = $true }
 & (Join-Path $Root "build-standalone.ps1") @buildArguments
 
+# Exercise the real inline app in source, generated output, and the root download.
+if (-not (Get-Command node -ErrorAction SilentlyContinue)) { throw "Node.js 18+ is required for reception regression tests." }
+& node (Join-Path $Root "tests/reception-controls.test.mjs")
+if ($LASTEXITCODE -ne 0) { throw "Reception regression tests failed." }
+
 Write-Host "[OK] Repository check passed." -ForegroundColor Green
 
 # WebRTC readiness DataChannel regression
