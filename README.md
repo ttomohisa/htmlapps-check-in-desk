@@ -25,7 +25,7 @@ GitHub Pages delivers the initial HTML. After it loads, roster management, check
 - **Handle walk-ins without breaking the flow** — Add a person for the current session only, or add them to the reusable roster at the same time.
 - **Keep corrections understandable** — Immediate toast Undo removes an accidental just-recorded action; later corrections from Recent activity remain in the session activity history.
 - **Review repeated attendance** — Keep completed sessions, inspect per-person history, reopen a session, rename it, view an attendance matrix, and remove an old session with confirmation and Undo.
-- **Import and export practical files** — Review roster CSV duplicates / skipped rows before import, save roster CSV, save all-history or per-session CSV, and save / restore a complete JSON backup.
+- **Import and export practical files** — Review roster CSV duplicates / skipped rows before import, save roster CSV, save filtered reception CSV with an editable filename, save all-history or per-session CSV, and save / restore a complete JSON backup.
 - **Stay local by design** — No account, backend, analytics, telemetry, cloud database, model, or third-party runtime dependency is required.
 
 ## Quick start
@@ -58,6 +58,12 @@ No application data is uploaded during unpacking.
 5. Use **Add walk-in** for someone not already on the roster. You can optionally add that person to the reusable roster too.
 6. End the check-in and review it under **History**. Completed sessions remain on the device until you delete them or clear browser storage.
 7. Export roster / history CSV when needed, and save a JSON backup before moving devices or clearing browser data.
+
+### Export the shown reception
+
+Use **Export shown CSV (N)** beside the reception filters to save only the people currently displayed, in the same order. Status, group and name / ID / group search are combined. The action is disabled when nothing is shown.
+
+The dialog captures the rows at opening and lets you edit the filename before saving. Cancel, close, Escape or the backdrop discard that snapshot; reopening captures fresh rows. Ending, replacing or restoring a session cancels an unsaved export. In Entry / Exit mode, **Checked in** includes people who have entered and later exited. All-history and per-session CSV still export their complete scopes. Literal group names such as `__ungrouped__` are distinct from **No group**.
 
 ### Roster CSV
 

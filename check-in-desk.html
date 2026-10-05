@@ -776,6 +776,7 @@
                   </div>
                   <label class="field"><span class="field-label" data-i18n="groupFilter">グループで絞り込み</span><select class="field-select" id="receptionGroupFilter"><option value="" data-i18n="allGroups">すべてのグループ</option></select></label>
                 </div>
+                <button class="button small" id="exportReceptionButton" type="button" disabled>表示中をCSV保存 (0)</button>
               </div>
             </div>
             <div class="reception-layout">
@@ -872,6 +873,15 @@
   <dialog class="app-form-dialog" id="sessionDialog" aria-labelledby="sessionDialogTitle">
     <div class="dialog-header"><h2 id="sessionDialogTitle" data-i18n="startReception">新しい受付を開始</h2><button class="icon-button" id="closeSessionDialog" type="button" data-i18n-aria-label="close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
     <div class="dialog-body"><form class="dialog-form" id="sessionForm"><label class="field"><span class="field-label" data-i18n="receptionName">受付名</span><input class="field-input" id="sessionNameInput" maxlength="120" autocomplete="off" required></label><label class="field"><span class="field-label" data-i18n="targetRoster">対象</span><select class="field-select" id="sessionTargetGroup"><option value="" data-i18n="allMembers">全メンバー</option></select></label><fieldset class="field" style="border:0;padding:0;margin:0"><legend class="field-label" data-i18n="mode">受付方法</legend><div class="segmented" id="sessionModePicker"><button class="segment is-active" type="button" data-session-mode="checkin" data-i18n="modeCheckin">受付</button><button class="segment" type="button" data-session-mode="entryexit" data-i18n="modeEntryExit">入退室</button></div><p class="field-help" id="sessionModeHelp" data-i18n="modeCheckinHelp">最初の受付時刻を記録します。</p></fieldset><div class="inline-note" id="sessionTargetPreview"></div><div class="dialog-actions"><button class="button" id="cancelSessionDialog" type="button" data-i18n="cancel">キャンセル</button><button class="button primary" type="submit" data-i18n="startReception">受付を開始</button></div></form></div>
+  </dialog>
+
+  <dialog class="app-form-dialog" id="receptionExportDialog" aria-labelledby="receptionExportTitle">
+    <div class="dialog-header"><h2 id="receptionExportTitle" data-i18n="exportReceptionTitle">表示中の受付をCSV保存</h2><button class="icon-button" id="closeReceptionExportDialog" type="button" data-i18n-aria-label="close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+    <div class="dialog-body"><form class="dialog-form" id="receptionExportForm">
+      <p class="field-help" id="receptionExportSummary"></p>
+      <label class="field"><span class="field-label" data-i18n="exportFilename">ファイル名 (.csv)</span><input class="field-input" id="receptionExportFilename" maxlength="160" autocomplete="off"></label>
+      <div class="dialog-actions"><button class="button" id="cancelReceptionExportDialog" type="button" data-i18n="cancel">キャンセル</button><button class="button primary" type="submit" data-i18n="saveCsv">CSVを保存</button></div>
+    </form></div>
   </dialog>
 
   <dialog class="app-form-dialog" id="sessionNameDialog" aria-labelledby="sessionNameDialogTitle">
@@ -976,6 +986,7 @@
         <li data-i18n="helpStep2">受付タブで「新しい受付を開始」を選び、対象と受付方法を決めます。</li>
         <li data-i18n="helpStep3">名前を検索して受付します。終了後も履歴は残り、次回は同じ名簿をそのまま使えます。</li>
         <li data-i18n="helpReceptionReset">受付の開始・再開時は検索とグループ絞り込みを解除し、未受付の一覧に戻ります。</li>
+        <li data-i18n="helpReceptionExport">「表示中をCSV保存」で絞り込み後の対象者だけを保存できます。保存画面を開いた時点の内容を使い、ファイル名を変更できます。</li>
         <li data-i18n="helpReceptionEnter">検索結果が1人ならEnterで記録できます。日本語などの変換確定中やキーを押し続けたときは記録しません。</li>
       </ol>
       <h3 data-i18n="helpModesTitle">受付方法</h3>
@@ -1006,7 +1017,7 @@
       'use strict';
 
       const APP_CONFIG = {"$schema":"./schemas/app-config.schema.json","name":"Check-in Desk","nameJa":"受付・出欠チェック","slug":"check-in-desk","version":"1.0.0","description":"A fully local reusable-roster check-in and attendance tracker that runs as a single HTML file.","descriptionJa":"繰り返し使える名簿で受付・出欠・入退室を記録する、完全ローカル処理の単一HTMLツールです。","defaultLanguage":"auto","repository":{"owner":"ttomohisa","name":"htmlapps-check-in-desk"},"build":{"output":"dist/index.html","blockRuntimeNetwork":true,"selfExtract":{"enabled":true,"output":"dist/index.self-extract.html"},"sizeBudget":{"readableWarningMb":5,"selfExtractWarningMb":2}}};
-      const BUILD_MANIFEST = {"schemaVersion":2,"builder":"single-html-app-template/1.2","generatedAtUtc":"2026-10-05T04:59:29.0312375Z","app":{"name":"Check-in Desk","slug":"check-in-desk","version":"1.0.0"},"dependencies":[]};
+      const BUILD_MANIFEST = {"schemaVersion":2,"builder":"single-html-app-template/1.2","generatedAtUtc":"2026-10-05T18:21:49.9388493Z","app":{"name":"Check-in Desk","slug":"check-in-desk","version":"1.0.0"},"dependencies":[]};
       // Asset payloads are Base64 exactly once. The JSON bundle itself is embedded directly.
       const assetBundle = {"schemaVersion":2,"dependencies":{}};
       const blobUrls = new Set();
@@ -1133,7 +1144,8 @@
           csvFormat:'CSV形式', csvFormatTitle:'名簿CSVの形式', csvFormatIntro:'1行目に見出しを入れ、2行目以降に1人ずつ記入します。名前だけ必須です。', csvColumnsTitle:'列', csvColName:'名前 — 必須', csvColId:'ID — 任意', csvColGroup:'グループ — 任意', csvColNote:'メモ — 任意', csvExampleTitle:'記入例', csvFormatNote:'英語見出し（name,id,group,note）と日本語見出しの両方を読み込めます。見出しがない場合は1列目を名前として読み込みます。余分な列は無視し、1回に最大5,000人まで読み込めます。', downloadCsvTemplate:'CSVテンプレートを保存', csvImported:'{count}人を追加しました', csvNoRows:'追加できる行がありませんでした。', csvInvalid:'CSVを読み込めませんでした。1列目または name / 名前 列に名前を入れてください。', csvPartial:'{added}人を追加、{skipped}行をスキップしました。', csvPreviewTitle:'CSVの読み込み確認', csvPlanned:'追加予定', csvDuplicates:'重複候補', csvSkipped:'読み飛ばし', csvIncludeDuplicates:'重複候補も追加する', csvDuplicateHelp:'同じID、または同じ名前を重複候補として扱います。IDが同じで名前が違う場合も確認できます。', csvSkippedHelp:'名前が空の行や入力上限を超える行は読み飛ばします。余分な列は無視します。', csvDuplicateId:'ID重複', csvDuplicateName:'名前重複', csvIdConflict:'同じID・別名', csvNameConflict:'同じ名前・別ID', csvRowsLimit:'CSVは最大5,000人まで読み込めます。', csvImportConfirm:'この内容で追加', csvDuplicateTag:'重複候補', csvMoreRows:'ほか {count}人', downloaded:'ファイルを保存しました', copied:'コピーしました', copyFailed:'コピーできませんでした',
           backupRestored:'バックアップを復元しました', backupInvalid:'このバックアップを読み込めませんでした。', restoreConfirmTitle:'バックアップを復元', restoreConfirmMessage:'現在の名簿と受付履歴を、選択したバックアップで置き換えます。', resetConfirmTitle:'すべてのデータを削除', resetConfirmMessage:'名簿と受付履歴をこのブラウザーから削除します。この操作は元に戻せません。', resetDone:'すべてのデータを削除しました',
           noHistory:'記録なし', presentMark:'出席', sessionCsv:'この受付をCSV保存', walkInCount:'当日参加', storageWriteFailed:'端末内ストレージへ保存できませんでした。このページを閉じる前にJSONバックアップを保存してください。', storageReadFailed:'保存済みデータを読み込めませんでした。現在のデータを上書きしないため自動保存を停止しています。JSONバックアップから復元するか、すべて削除して再開してください。', storageBlocked:'自動保存は停止中です。JSONバックアップから復元するか、すべて削除してください。', absentMark:'欠席', notTarget:'対象外', sessionDetailPeople:'対象者', sessionDetailEvents:'記録', walkInOnly:'今回のみ',
-          helpBasicsTitle:'基本の使い方', helpStep1:'名簿にメンバーを登録します。CSVからまとめて追加することもできます。', helpStep2:'受付タブで「新しい受付を開始」を選び、対象と受付方法を決めます。', helpStep3:'名前を検索して受付します。終了後も履歴は残り、次回は同じ名簿をそのまま使えます。', helpReceptionReset:'受付の開始・再開時は検索とグループ絞り込みを解除し、未受付の一覧に戻ります。', helpReceptionEnter:'検索結果が1人ならEnterで記録できます。日本語などの変換確定中やキーを押し続けたときは記録しません。', helpModesTitle:'受付方法', helpCheckin:'受付: 1人につき1回の参加時刻を記録します。', helpEntryExit:'入退室: 同じ人の入室・退室・再入室を時系列で記録します。', helpWalkIn:'名簿にいない人は当日参加者として追加でき、必要なら名簿にも登録できます。', helpCsv:'名簿のCSV読込の横にある情報アイコンから、列の説明とテンプレートを確認できます。', helpRosterSnapshot:'受付を開始した後に名簿を編集・削除しても、その受付と過去の履歴には開始時点の名前が残ります。', helpPrivacyTitle:'データとプライバシー', helpPrivacyBody:'名簿と受付履歴はこのブラウザー内だけで処理・保存されます。このアプリからサーバーへ送信されません。', helpBackup:'ブラウザーのサイトデータを削除すると名簿や履歴も消える場合があります。継続利用する場合はJSONバックアップを保存してください。', helpNotesTitle:'注意事項', helpNoteLocal:'複数端末間の自動同期はありません。別端末へ移す場合はJSONバックアップを使います。', helpNoteIdentity:'本人確認や入退室のセキュリティゲート用途ではなく、受付・出欠記録のためのツールです。', helpNoteStorage:'重要な履歴はCSVまたはJSONとして保存してください。ブラウザーのストレージは消去されることがあります。', helpOffline:'配布版は単一HTMLで、必要な処理はページ内で完結します。', footer:'完全内包HTMLとして生成'
+          exportReception:'表示中をCSV保存 ({count})', exportReceptionTitle:'表示中の受付をCSV保存', exportReceptionSummary:'この画面を開いた時点の表示中 {count} 人を保存します。検索・グループ・受付状態の絞り込みを反映します。', exportFilename:'ファイル名 (.csv)', saveCsv:'CSVを保存',
+          helpBasicsTitle:'基本の使い方', helpStep1:'名簿にメンバーを登録します。CSVからまとめて追加することもできます。', helpStep2:'受付タブで「新しい受付を開始」を選び、対象と受付方法を決めます。', helpStep3:'名前を検索して受付します。終了後も履歴は残り、次回は同じ名簿をそのまま使えます。', helpReceptionExport:'「表示中をCSV保存」で絞り込み後の対象者だけを保存できます。保存画面を開いた時点の内容を使い、ファイル名を変更できます。受付を終了・切替・復元すると未保存の書き出しは取り消されます。入退室の受付済みは退室した人も含みます。', helpReceptionReset:'受付の開始・再開時は検索とグループ絞り込みを解除し、未受付の一覧に戻ります。', helpReceptionEnter:'検索結果が1人ならEnterで記録できます。日本語などの変換確定中やキーを押し続けたときは記録しません。', helpModesTitle:'受付方法', helpCheckin:'受付: 1人につき1回の参加時刻を記録します。', helpEntryExit:'入退室: 同じ人の入室・退室・再入室を時系列で記録します。', helpWalkIn:'名簿にいない人は当日参加者として追加でき、必要なら名簿にも登録できます。', helpCsv:'名簿のCSV読込の横にある情報アイコンから、列の説明とテンプレートを確認できます。', helpRosterSnapshot:'受付を開始した後に名簿を編集・削除しても、その受付と過去の履歴には開始時点の名前が残ります。', helpPrivacyTitle:'データとプライバシー', helpPrivacyBody:'名簿と受付履歴はこのブラウザー内だけで処理・保存されます。このアプリからサーバーへ送信されません。', helpBackup:'ブラウザーのサイトデータを削除すると名簿や履歴も消える場合があります。継続利用する場合はJSONバックアップを保存してください。', helpNotesTitle:'注意事項', helpNoteLocal:'複数端末間の自動同期はありません。別端末へ移す場合はJSONバックアップを使います。', helpNoteIdentity:'本人確認や入退室のセキュリティゲート用途ではなく、受付・出欠記録のためのツールです。', helpNoteStorage:'重要な履歴はCSVまたはJSONとして保存してください。ブラウザーのストレージは消去されることがあります。', helpOffline:'配布版は単一HTMLで、必要な処理はページ内で完結します。', footer:'完全内包HTMLとして生成'
         },
         en: {
           brandMeta:'Reusable roster · Fully local processing', helpTitle:'How to use & notes', close:'Close',
@@ -1158,7 +1170,8 @@
           csvFormat:'CSV format', csvFormatTitle:'Roster CSV format', csvFormatIntro:'Put column headers on the first row and one person per row after that. Only the name is required.', csvColumnsTitle:'Columns', csvColName:'Name — required', csvColId:'ID — optional', csvColGroup:'Group — optional', csvColNote:'Note — optional', csvExampleTitle:'Example', csvFormatNote:'Both English headers (name,id,group,note) and Japanese headers are supported. Without headers, the first column is treated as the name. Extra columns are ignored; up to 5,000 people can be imported at once.', downloadCsvTemplate:'Save CSV template', csvImported:'Added {count} people', csvNoRows:'No rows could be added.', csvInvalid:'Could not read the CSV. Put names in the first column or a name / 名前 column.', csvPartial:'Added {added} people; skipped {skipped} rows.', csvPreviewTitle:'Review CSV import', csvPlanned:'Will add', csvDuplicates:'Possible duplicates', csvSkipped:'Skipped', csvIncludeDuplicates:'Add possible duplicates too', csvDuplicateHelp:'Matching ID or matching name is treated as a possible duplicate. A matching ID with a different name is also highlighted.', csvSkippedHelp:'Rows with no name or values over the input limits are skipped. Extra columns are ignored.', csvDuplicateId:'Duplicate ID', csvDuplicateName:'Duplicate name', csvIdConflict:'Same ID, different name', csvNameConflict:'Same name, different ID', csvRowsLimit:'Up to 5,000 people can be imported at once.', csvImportConfirm:'Add these people', csvDuplicateTag:'Possible duplicate', csvMoreRows:'{count} more people', downloaded:'File saved', copied:'Copied', copyFailed:'Could not copy',
           backupRestored:'Backup restored', backupInvalid:'This backup could not be read.', restoreConfirmTitle:'Restore backup', restoreConfirmMessage:'Replace the current roster and history with the selected backup?', resetConfirmTitle:'Delete all data', resetConfirmMessage:'Delete the roster and all check-in history from this browser? This cannot be undone.', resetDone:'All data deleted',
           noHistory:'No records', presentMark:'Present', sessionCsv:'Save this check-in CSV', walkInCount:'Walk-ins', storageWriteFailed:'Could not save to browser storage. Save a JSON backup before closing this page.', storageReadFailed:'Saved data could not be read. Automatic saving is paused to avoid overwriting it. Restore a JSON backup or delete all data to start over.', storageBlocked:'Automatic saving is paused. Restore a JSON backup or delete all data.', absentMark:'Absent', notTarget:'Not target', sessionDetailPeople:'People', sessionDetailEvents:'Records', walkInOnly:'This session only',
-          helpBasicsTitle:'Basics', helpStep1:'Add people to the roster. You can also import many people from CSV.', helpStep2:'On Check-in, choose Start new check-in, then select the target group and mode.', helpStep3:'Search for a name and record attendance. The history remains available and the same roster can be reused next time.', helpReceptionReset:'Starting or reopening a session clears search and group filters and returns to Pending.', helpReceptionEnter:'With one actionable search result, press Enter to record it. Confirming composed text or holding Enter does not record attendance.', helpModesTitle:'Modes', helpCheckin:'Check-in records one attendance time per person.', helpEntryExit:'Entry / Exit records repeated entry, exit, and re-entry events.', helpWalkIn:'People not on the roster can be added as walk-ins, with the option to add them to the reusable roster too.', helpCsv:'Use the info icon next to Import CSV on the Roster screen to view supported columns and save a template.', helpRosterSnapshot:'After a check-in starts, editing or deleting the reusable roster does not change that session or past history.', helpPrivacyTitle:'Data & privacy', helpPrivacyBody:'The roster and check-in history are processed and stored only in this browser. This app does not send them to a server.', helpBackup:'Clearing browser site data can remove the roster and history. Save a JSON backup when you need to keep or move the data.', helpNotesTitle:'Notes', helpNoteLocal:'There is no automatic multi-device sync. Use a JSON backup to move data between devices.', helpNoteIdentity:'This is an attendance and reception tool, not an identity-verification system or security access gate.', helpNoteStorage:'Save important history as CSV or JSON because browser storage can be cleared.', helpOffline:'The distributable is a single HTML file and all required processing stays inside the page.', footer:'Generated as one self-contained HTML file'
+          exportReception:'Export shown CSV ({count})', exportReceptionTitle:'Export shown reception', exportReceptionSummary:'Save the {count} people shown when this dialog opened, with the current search, group and attendance filters applied.', exportFilename:'File name (.csv)', saveCsv:'Save CSV',
+          helpBasicsTitle:'Basics', helpStep1:'Add people to the roster. You can also import many people from CSV.', helpStep2:'On Check-in, choose Start new check-in, then select the target group and mode.', helpStep3:'Search for a name and record attendance. The history remains available and the same roster can be reused next time.', helpReceptionExport:'Export shown CSV saves only the filtered people, using the rows captured when the dialog opens. You can edit the filename. Ending, switching or restoring the session cancels an unsaved export. In Entry / Exit, Checked in includes people who have already exited.', helpReceptionReset:'Starting or reopening a session clears search and group filters and returns to Pending.', helpReceptionEnter:'With one actionable search result, press Enter to record it. Confirming composed text or holding Enter does not record attendance.', helpModesTitle:'Modes', helpCheckin:'Check-in records one attendance time per person.', helpEntryExit:'Entry / Exit records repeated entry, exit, and re-entry events.', helpWalkIn:'People not on the roster can be added as walk-ins, with the option to add them to the reusable roster too.', helpCsv:'Use the info icon next to Import CSV on the Roster screen to view supported columns and save a template.', helpRosterSnapshot:'After a check-in starts, editing or deleting the reusable roster does not change that session or past history.', helpPrivacyTitle:'Data & privacy', helpPrivacyBody:'The roster and check-in history are processed and stored only in this browser. This app does not send them to a server.', helpBackup:'Clearing browser site data can remove the roster and history. Save a JSON backup when you need to keep or move the data.', helpNotesTitle:'Notes', helpNoteLocal:'There is no automatic multi-device sync. Use a JSON backup to move data between devices.', helpNoteIdentity:'This is an attendance and reception tool, not an identity-verification system or security access gate.', helpNoteStorage:'Save important history as CSV or JSON because browser storage can be cleared.', helpOffline:'The distributable is a single HTML file and all required processing stays inside the page.', footer:'Generated as one self-contained HTML file'
         }
       };
 
@@ -1174,6 +1187,7 @@
       let receptionFilter = 'pending';
       let receptionSessionId = null;
       let receptionGroupFilter = '';
+      let receptionExportSession = null, receptionExportFilename = '', pendingReceptionExport = null;
       let receptionFocus = false;
       let pendingCsvImport = null;
       let sessionModeDraft = 'checkin';
@@ -1282,12 +1296,13 @@
       function renderAll(){ renderSampleBanner(); renderGroups(); renderReception(); renderRoster(); renderHistory(); renderData(); }
       function renderGroups(){ const groups=allGroups(); const selects=[$('#rosterGroupFilter'),$('#sessionTargetGroup')]; for(const select of selects){const value=select.value; const first=select===selects[0]?`<option value="">${esc(t('allGroups'))}</option>`:`<option value="">${esc(t('allMembers'))}</option>`; select.innerHTML=first+groups.map(g=>`<option value="${esc(g)}">${esc(g)}</option>`).join(''); if([...select.options].some(o=>o.value===value))select.value=value;} updateSessionTargetPreview(); }
 
+      // Real group names have a separate namespace from the synthetic No group option.
       function renderReceptionGroupFilter(session){
         const select=$('#receptionGroupFilter'); if(!select||!session)return;
         const value=receptionGroupFilter;
         const groups=[...new Set((session.targetMembers||[]).map(p=>p.group?.trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b,language==='ja'?'ja':'en'));
         const hasUngrouped=(session.targetMembers||[]).some(p=>!p.group?.trim());
-        select.innerHTML=`<option value="">${esc(t('allGroups'))}</option>`+groups.map(g=>`<option value="${esc(g)}">${esc(g)}</option>`).join('')+(hasUngrouped?`<option value="__ungrouped__">${esc(t('noGroup'))}</option>`:'');
+        select.innerHTML=`<option value="">${esc(t('allGroups'))}</option>`+groups.map(g=>`<option value="${esc(`group:${g}`)}">${esc(g)}</option>`).join('')+(hasUngrouped?`<option value="ungrouped">${esc(t('noGroup'))}</option>`:'');
         if([...select.options].some(o=>o.value===value))select.value=value;else{receptionGroupFilter='';select.value='';}
       }
       function visibleReceptionPeople(session){
@@ -1295,7 +1310,7 @@
         return (session.targetMembers||[]).filter(p=>{
           const st=personStatus(session,personKey(p));
           const filterOk=receptionFilter==='all'||(receptionFilter==='present'?st.present:!st.present);
-          const groupOk=!receptionGroupFilter||(receptionGroupFilter==='__ungrouped__'?!p.group?.trim():p.group===receptionGroupFilter);
+          const groupOk=!receptionGroupFilter||(receptionGroupFilter==='ungrouped'?!p.group?.trim():`group:${p.group?.trim()}`===receptionGroupFilter);
           const queryOk=!q||normalizedText([p.name,p.externalId,p.group].join(' ')).includes(q);
           return filterOk&&groupOk&&queryOk;
         });
@@ -1308,6 +1323,9 @@
       }
       function renderReception(){
         const session=activeSession();
+        if(receptionExportSession!==session){closeReceptionExport(false);receptionExportSession=session;receptionExportFilename='';}
+        const exportButton=$('#exportReceptionButton');
+        exportButton.disabled=true;exportButton.textContent=t('exportReception',{count:0});
         // Search and filters belong to one reception, including reopened sessions.
         const sessionId=session?.id||null;
         if(receptionSessionId!==sessionId){receptionSessionId=sessionId;receptionFilter='pending';receptionGroupFilter='';$('#receptionSearch').value='';}
@@ -1321,6 +1339,8 @@
           const people=session.targetMembers||[]; const present=people.filter(p=>personStatus(session,personKey(p)).present).length; const pending=people.length-present;
           $('#metricTarget').textContent=people.length; $('#metricPresent').textContent=present; $('#metricPending').textContent=pending; $('#metricRate').textContent=people.length?`${Math.round(present/people.length*100)}%`:'0%'; $('#pendingCountPill').textContent=pending; $('#presentCountPill').textContent=present;
           renderReceptionGroupFilter(session); const filtered=visibleReceptionPeople(session);
+          exportButton.disabled=!filtered.length;exportButton.textContent=t('exportReception',{count:filtered.length});
+          if(pendingReceptionExport)$('#receptionExportSummary').textContent=t('exportReceptionSummary',{count:pendingReceptionExport.rows.length-1});
           $('#receptionNoResults').classList.toggle('hidden',filtered.length>0); $('#receptionMemberList').innerHTML=filtered.map(p=>receptionPersonHtml(session,p)).join(''); updateReceptionSearchHint(session,filtered); renderRecentActivity(session);
         }
         renderSessionLists();
@@ -1386,7 +1406,34 @@
       function confirmCsvImport(){if(!pendingCsvImport)return;const include=$('#csvIncludeDuplicates').checked;const selected=pendingCsvImport.candidates.filter(c=>include||!c.duplicateReason);if(!selected.length)return;for(const c of selected)state.members.push({id:id('member'),name:c.name,externalId:c.externalId,group:c.group,note:c.note,sample:false,createdAt:new Date().toISOString()});const skipped=pendingCsvImport.skipped+(include?0:pendingCsvImport.candidates.filter(c=>c.duplicateReason).length);const added=selected.length;closeCsvPreview();persist();toast(skipped?t('csvPartial',{added,skipped}):t('csvImported',{count:added}),{tone:'success'});}
 
       function exportRoster(){const rows=[['name','id','group','note'],...state.members.map(m=>[m.name,m.externalId||'',m.group||'',m.note||''])];download('check-in-roster.csv','\ufeff'+rows.map(r=>r.map(csvEscape).join(',')).join('\r\n'),'text/csv;charset=utf-8');}
-      function attendanceRows(sessions){const rows=[['session','started_at','ended_at','mode','name','id','group','walk_in','status','first_record_at','last_record_at']];for(const x of sessions){for(const p of x.targetMembers||[]){const key=personKey(p),events=effectivePersonEvents(x,key),st=personStatus(x,key);rows.push([x.name,x.startedAt,x.endedAt||'',x.mode,p.name,p.externalId||'',p.group||'',p.isWalkIn?'1':'0',st.present?'present':'absent',events[0]?.at||'',events.at(-1)?.at||'']);}}return rows;}
+      function attendanceRows(sessions,peopleForSession=x=>x.targetMembers||[]){const rows=[['session','started_at','ended_at','mode','name','id','group','walk_in','status','first_record_at','last_record_at']];for(const x of sessions){for(const p of peopleForSession(x)){const key=personKey(p),events=effectivePersonEvents(x,key),st=personStatus(x,key);rows.push([x.name,x.startedAt,x.endedAt||'',x.mode,p.name,p.externalId||'',p.group||'',p.isWalkIn?'1':'0',st.present?'present':'absent',events[0]?.at||'',events.at(-1)?.at||'']);}}return rows;}
+      function receptionCsvFilename(value,fallback){
+        const base=String(value||'').normalize('NFKC').replace(/[\u0000-\u001f\u007f]/g,'').trim().replace(/(?:\.csv)+$/i,'').replace(/[\\/:*?"<>|]+/g,'-').replace(/\s+/g,' ').replace(/[. ]+$/g,'').slice(0,100).trim();
+        return `${base||fallback}.csv`;
+      }
+      function openReceptionExport(){
+        if(pendingReceptionExport&&$('#receptionExportDialog').open)return;
+        const session=activeSession();if(!session)return;
+        const people=visibleReceptionPeople(session);if(!people.length)return;
+        // Capture values now, not mutable member/event references or filters at submit time.
+        pendingReceptionExport={session,rows:attendanceRows([session],()=>people),fallback:receptionCsvFilename(`${session.name}-shown`,'check-in-shown').slice(0,-4)};
+        $('#receptionExportFilename').value=receptionExportFilename||`${pendingReceptionExport.fallback}.csv`;
+        $('#receptionExportSummary').textContent=t('exportReceptionSummary',{count:people.length});
+        $('#receptionExportDialog').showModal();$('#receptionExportFilename').select();
+      }
+      function closeReceptionExport(restoreFocus=true){
+        const pending=pendingReceptionExport;pendingReceptionExport=null;
+        if(pending&&activeSession()===pending.session)receptionExportFilename=$('#receptionExportFilename').value;
+        closeDialog('#receptionExportDialog');
+        if(restoreFocus&&pending&&activeSession()===pending.session)$('#exportReceptionButton').focus({preventScroll:true});
+      }
+      function submitReceptionExport(event){
+        event.preventDefault();const pending=pendingReceptionExport;
+        if(!pending||activeSession()!==pending.session){closeReceptionExport(false);return;}
+        const filename=receptionCsvFilename($('#receptionExportFilename').value,pending.fallback);
+        const csv='\ufeff'+pending.rows.map(row=>row.map(csvEscape).join(',')).join('\r\n');
+        closeReceptionExport();download(filename,csv,'text/csv;charset=utf-8');
+      }
       function exportAttendance(){const rows=attendanceRows(state.sessions);download('check-in-history.csv','\ufeff'+rows.map(r=>r.map(csvEscape).join(',')).join('\r\n'),'text/csv;charset=utf-8');}
       function exportSessionAttendance(sessionId){const x=sessionById(sessionId);if(!x)return;const rows=attendanceRows([x]);download(`${safeFilenameBase(x.name)}.csv`,'\ufeff'+rows.map(r=>r.map(csvEscape).join(',')).join('\r\n'),'text/csv;charset=utf-8');}
       function exportBackup(){download(`check-in-desk-backup-${new Date().toISOString().slice(0,10)}.json`,JSON.stringify({app:'check-in-desk',schemaVersion:SCHEMA_VERSION,exportedAt:new Date().toISOString(),data:state},null,2),'application/json;charset=utf-8');}
@@ -1415,6 +1462,12 @@
       $('#focusReceptionButton').addEventListener('click',()=>setReceptionFocus(true)); $('#exitFocusHeaderButton').addEventListener('click',()=>setReceptionFocus(false));
       $('#sessionTargetGroup').addEventListener('change',updateSessionTargetPreview); $$('#sessionModePicker [data-session-mode]').forEach(b=>b.addEventListener('click',()=>{sessionModeDraft=b.dataset.sessionMode;$$('#sessionModePicker [data-session-mode]').forEach(x=>x.classList.toggle('is-active',x===b));$('#sessionModeHelp').textContent=t(sessionModeDraft==='entryexit'?'modeEntryExitHelp':'modeCheckinHelp');}));
       $$('.segment[data-reception-filter]').forEach(b=>b.addEventListener('click',()=>{receptionFilter=b.dataset.receptionFilter;renderReception();}));
+      $('#exportReceptionButton').addEventListener('click',openReceptionExport);
+      $('#receptionExportForm').addEventListener('submit',submitReceptionExport);
+      $('#closeReceptionExportDialog').addEventListener('click',()=>closeReceptionExport());$('#cancelReceptionExportDialog').addEventListener('click',()=>closeReceptionExport());
+      $('#receptionExportDialog').addEventListener('cancel',event=>{event.preventDefault();closeReceptionExport();});
+      $('#receptionExportDialog').addEventListener('close',()=>{if(!$('#receptionExportDialog').open)closeReceptionExport();});
+      $('#receptionExportDialog').addEventListener('click',event=>{const dialog=$('#receptionExportDialog');if(event.target!==dialog)return;const rect=dialog.getBoundingClientRect();if(event.clientX<rect.left||event.clientX>rect.right||event.clientY<rect.top||event.clientY>rect.bottom)closeReceptionExport();});
       $('#receptionSearch').addEventListener('input',renderReception); $('#receptionGroupFilter').addEventListener('change',e=>{receptionGroupFilter=e.target.value;renderReception();});
       $('#receptionSearch').addEventListener('keydown',e=>{if(e.key!=='Enter'||e.isComposing||e.keyCode===229||e.repeat)return;const s=activeSession();if(!s)return;const filtered=visibleReceptionPeople(s);if(filtered.length!==1)return;e.preventDefault();const p=filtered[0],key=personKey(p),st=personStatus(s,key);if(s.mode==='entryexit')toggleEntry(key);else if(!st.present)addEvent(key,'checkin');else toast(t('alreadyCheckedIn'),{tone:'warning'});});
       $('#rosterSearch').addEventListener('input',renderRoster); $('#rosterGroupFilter').addEventListener('change',renderRoster);
