@@ -12,6 +12,11 @@ All notable changes to this project will be documented in this file.
 - Ignore IME composition-confirmation and auto-repeated Enter so text entry cannot accidentally record attendance or toggle Entry / Exit.
 - Add bilingual regression tests for session transitions, filter state, keyboard guards, normal check-in, Entry / Exit, focus, and immediate Undo across source and standalone downloads.
 
+## [1.0.1] - 2026-10-07
+
+- Normalize the header language target to EN / JA with matching localized accessible labels and tooltips. Keep local-processing and Help text localized.
+- Add regression coverage for repeated language switches preserving working data, filters, and Undo.
+
 ## [1.0.0] - 2026-09-03
 
 - Promoted the release candidate to the first stable release after full repository, data-flow, privacy, responsive-layout, and standalone-output review.
