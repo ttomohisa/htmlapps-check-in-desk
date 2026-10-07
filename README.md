@@ -8,6 +8,8 @@
 
 A privacy-focused, single-HTML check-in and attendance tracker for reusable rosters. Keep a roster on one device, run repeated check-in or entry/exit sessions, review history, and export CSV or JSON without sending roster or attendance data to an application server.
 
+Use **EN / JA** in the header to switch language without clearing your search or saved data. The adjacent Help button and local-processing badge follow the selected language.
+
 ## 🚀 Live demo
 
 ### [Open Check-in Desk on GitHub Pages](https://ttomohisa.github.io/htmlapps-check-in-desk/)

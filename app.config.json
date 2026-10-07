@@ -3,7 +3,7 @@
   "name": "Check-in Desk",
   "nameJa": "受付・出欠チェック",
   "slug": "check-in-desk",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A fully local reusable-roster check-in and attendance tracker that runs as a single HTML file.",
   "descriptionJa": "繰り返し使える名簿で受付・出欠・入退室を記録する、完全ローカル処理の単一HTMLツールです。",
   "defaultLanguage": "auto",

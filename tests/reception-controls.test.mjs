@@ -28,7 +28,7 @@ if (verifyParity) test('source, readable, root download and decompressed release
 // not a browser/layout test; cloud-preview QA separately covers rendered UI.
 function boot(file, language = 'en') {
   const html = readHtml(file);
-  const nodes = new Map();
+  const nodes = new Map(), all = [];
   let activeElement = null;
   const downloads=[], blobs=new Map();
   let fileRead=null;
@@ -65,13 +65,16 @@ function boot(file, language = 'en') {
     get options() { const decode=s=>s.replace(/&quot;/g,'"').replace(/&#39;/g,"'").replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&'); return [...this.innerHTML.matchAll(/<option value="([^"]*)">([^<]*)<\/option>/g)].map(m => ({value:decode(m[1]),label:decode(m[2])})); }
   }
   function node(selector) { if (!nodes.has(selector)) { if(/^#[\w-]+$/.test(selector))return null; nodes.set(selector, new Element()); } return nodes.get(selector); }
-  for (const match of html.matchAll(/<\w+\s+([^>]*\bid="([^"]+)"[^>]*)>/g)) nodes.set(`#${match[2]}`, new Element(match[1]));
+  for (const match of html.matchAll(/<\w+\s+([^>]*)>/g)) {
+    const element = new Element(match[1]); all.push(element);
+    const id = element.getAttribute('id'); if (id) nodes.set(`#${id}`, element);
+  }
   const filters = [...html.matchAll(/<button\s+([^>]*\bdata-reception-filter="[^"]+"[^>]*)>/g)].map(m => new Element(m[1]));
   const modes = [...html.matchAll(/<button\s+([^>]*\bdata-session-mode="[^"]+"[^>]*)>/g)].map(m => new Element(m[1]));
   const document = {
     querySelector: node,
     createElement(tag) { const element=new Element();element.tagName=tag.toUpperCase();return element; },
-    querySelectorAll: selector => selector === '.segment[data-reception-filter]' ? filters : selector === '#sessionModePicker [data-session-mode]' ? modes : [],
+    querySelectorAll: selector => selector === '.segment[data-reception-filter]' ? filters : selector === '#sessionModePicker [data-session-mode]' ? modes : /^\[data-[\w-]+\]$/.test(selector) ? all.filter(el => el.getAttribute(selector.slice(1,-1)) !== null) : [],
     documentElement: {}, body: new Element(), addEventListener() {},
     get activeElement() { return activeElement; },
   };
@@ -97,7 +100,7 @@ function boot(file, language = 'en') {
   vm.runInContext(script,context,{filename:file});
   const app = context.app;
   return {
-    ...app, get state(){return app.state;}, node, filters, modes, stored, downloads,
+    ...app, get state(){return app.state;}, node, filters, modes, stored, downloads, document,
     async restore(data){app.importBackup({content:JSON.stringify({app:'check-in-desk',data})});node('#appConfirmOk').click();await fileRead;},
     async reset(){const pending=app.resetAll();node('#appConfirmOk').click();await pending;},
     openExport(){node('#exportReceptionButton').click();},
@@ -281,5 +284,34 @@ for(const file of targets) for(const language of ['ja','en']) {
     for(const [input,want] of [[' ../A\\B:\u0000*.CSV ','..-A-B-.csv'],[' \u0000 ','Synthetic session-shown.csv'],['report.csv.csv','report.csv']]){
       app.openExport();app.node('#receptionExportFilename').value=input;app.submitExport();assert.equal(app.downloads.at(-1).filename,want);
     }
+  });
+}
+
+for (const file of targets) for (const language of ['ja','en']) {
+  test(`${file} / ${language}: header target, privacy, Help and version remain localized through repeated toggles`, () => {
+    const app=boot(file,language), button=app.node('#languageButton');
+    for (const current of [language, language==='ja'?'en':'ja', language]) {
+      assert.equal(app.document.documentElement.lang,current);
+      assert.equal(button.textContent,current==='ja'?'EN':'JA');
+      const target=current==='ja'?'英語に切り替え':'Switch to Japanese';
+      assert.equal(button.getAttribute('aria-label'),target);assert.equal(button.title,target);
+      assert.equal(app.document.querySelectorAll('[data-i18n]').find(el=>el.dataset.i18n==='localBadge').textContent,current==='ja'?'完全ローカル処理':'Fully local processing');
+      const help=current==='ja'?'使い方と注意事項':'How to use & notes';
+      assert.equal(app.node('#helpButton').getAttribute('aria-label'),help);assert.equal(app.node('#helpButton').title,help);assert.equal(app.node('#helpTitle').textContent,help);
+      app.node('#helpButton').click();assert.equal(app.node('#helpDialog').open,true);app.node('#closeHelpButton').click();assert.equal(app.node('#helpDialog').open,false);
+      assert.equal(app.node('#versionBadge').textContent,'v'+JSON.parse(fs.readFileSync(path.join(root,'app.config.json'),'utf8')).version);
+      button.click();
+    }
+  });
+  test(`${file} / ${language}: language clicks preserve reception records, combined filters and pending Undo`, () => {
+    const app=boot(file,language),session=app.start();app.search('FAKE-001');app.key();
+    app.filter('all');app.group('Test A');app.search('FAKE-003');
+    const before=JSON.stringify(app.state),stored=app.stored.get('check-in-desk:state-v1');
+    for (let i=0;i<2;i++) {
+      app.node('#languageButton').click();assert.equal(JSON.stringify(app.state),before);assert.equal(app.stored.get('check-in-desk:state-v1'),stored);
+      assert.equal(app.node('#receptionSearch').value,'FAKE-003');assert.equal(app.node('#receptionGroupFilter').value,app.groupValue('Test A'));selected(app,'all');assert.deepEqual(visible(app),['synthetic-c']);
+      assert.equal(app.stored.get('check-in-desk:language'),i===0?(language==='ja'?'en':'ja'):language);
+    }
+    app.node('#appToastAction').click();assert.equal(session.events.length,0,'language toggles retain the reception Undo action');
   });
 }

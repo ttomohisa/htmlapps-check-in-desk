@@ -66,6 +66,8 @@ A successful session lets the user keep one roster, start a named check-in, reco
 
 ## 7. UX and accessibility
 
+- Header language control shows the target EN / JA, with matching localized aria-label and title (`英語に切り替え` / `Switch to Japanese`). Switching language preserves current data and useful UI state. Privacy remains `完全ローカル処理` / `Fully local processing`, and Help is localized.
+
 - Mobile-first from 320px.
 - Reception prioritizes the Pending list; the count drops as people are checked in.
 - Reception view removes management navigation from the visual workspace but is explicitly not a security lock.
