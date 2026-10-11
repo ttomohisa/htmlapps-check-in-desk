@@ -10,6 +10,8 @@ A privacy-focused, single-HTML check-in and attendance tracker for reusable rost
 
 Use **EN / JA** in the header to switch language without clearing your search or saved data. The adjacent Help button and local-processing badge follow the selected language.
 
+The background page stays still while a dialog is open. If a confirmation is taller than the screen, scroll inside its body to reach the actions. The close button stays visible at the top.
+
 ## 🚀 Live demo
 
 ### [Open Check-in Desk on GitHub Pages](https://ttomohisa.github.io/htmlapps-check-in-desk/)

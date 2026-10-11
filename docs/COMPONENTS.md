@@ -32,6 +32,8 @@ See [WebRTC QR Pairing Component](WEBRTC_QR_PAIRING.md) for the complete integra
 
 - Centered modal on desktop
 - Bottom-sheet presentation on smartphones
+- Bounded height, non-shrinking header, and internally scrollable message/actions
+- Root and body scrolling locked while any native modal is open
 - Safe-area aware
 - Cancel with `Esc`, the close button, or a backdrop tap
 - Restores focus to the previous control

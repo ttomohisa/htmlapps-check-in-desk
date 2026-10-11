@@ -43,6 +43,14 @@ Use this checklist before publishing Check-in Desk.
 5. Confirm Escape closes dialogs; in Reception view, Escape clears search first and then exits focused reception when appropriate.
 6. Test long names, IDs, group names, and notes for layout wrapping/truncation.
 
+## Modal layout regression
+
+- In Japanese and English, test desktop 1180 × 757 and short 393 × 252 CSS-pixel viewports. These sizes are browser viewport checks, not physical-device or virtual-keyboard coverage.
+- Scroll the page, open Help, and wheel outside the card and at both ends of its body. The background must stay in place, the body must reach the final note, and normal page scrolling must return after dismissal.
+- Open a confirmation for a long synthetic name. Its Close control must remain visible; scroll the body to reach both actions. Repeat Close, Cancel, Escape, and backdrop dismissal, checking opener focus and unchanged roster/session records. Do not accept a destructive action merely to test layout.
+- Recheck the existing member, session, session-name, walk-in, session-detail, person-history, CSV-preview, CSV-format, and shown-export dialogs. Keep their existing internal scrolling and submit/cancel behavior.
+- The dependency-free Node tests check CSS source contracts and confirmation handlers in a minimal DOM. They do not prove rendered geometry, scroll locking, native focus trapping, touch behavior, or browser downloads. Complete the native-browser checks separately.
+
 ## Release assets and documentation
 
 - `assets/favicon.svg` matches the app header icon and embedded favicon.

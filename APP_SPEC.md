@@ -68,6 +68,7 @@ A successful session lets the user keep one roster, start a named check-in, reco
 
 - Header language control shows the target EN / JA, with matching localized aria-label and title (`英語に切り替え` / `Switch to Japanese`). Switching language preserves current data and useful UI state. Privacy remains `完全ローカル処理` / `Fully local processing`, and Help is localized.
 
+- While any native modal is open, root and body scrolling are locked. Existing Help and form shells retain their layout. Confirmation dialogs use a non-shrinking header and an internally scrollable body so the message and actions remain reachable on short screens. Close, Cancel, Escape, backdrop dismissal, focus restoration, and action semantics stay unchanged.
 - Mobile-first from 320px.
 - Reception prioritizes the Pending list; the count drops as people are checked in.
 - Reception view removes management navigation from the visual workspace but is explicitly not a security lock.
