@@ -15,6 +15,41 @@ function readHtml(file) {
   const payload=html.match(/<script id="self-extract-payload"[^>]*>([^<]+)<\/script>/)?.[1];
   return payload?gunzipSync(Buffer.from(payload,'base64')).toString('utf8'):html;
 }
+
+// Source contracts only: the VM below does not calculate layout or dispatch
+// real wheel/touch input. Native browser QA must verify the short-height case.
+function cssRule(html, selector) {
+  const css = [...html.matchAll(/<style>([\s\S]*?)<\/style>/g)].map(m => m[1]).join('\n').replace(/\/\*[\s\S]*?\*\//g, '');
+  const rule = [...css.matchAll(/([^{}]+)\{([^{}]*)\}/g)].find(m => m[1].split(',').some(s => s.trim() === selector));
+  assert.ok(rule, `CSS rule exists: ${selector}`);
+  return Object.fromEntries(rule[2].split(';').filter(s => s.includes(':')).map(s => {
+    const colon = s.indexOf(':'); return [s.slice(0, colon).trim(), s.slice(colon + 1).trim()];
+  }));
+}
+for (const file of [...targets, 'components/confirm-dialog.html']) {
+  test(`${file}: CSS locks both page scroll containers only while a native modal is open`, () => {
+    const html = readHtml(file);
+    for (const selector of ['html:has(dialog:modal)', 'body:has(dialog:modal)']) {
+      const rule = cssRule(html, selector);
+      assert.equal(rule.overflow, 'hidden');
+      assert.equal(rule['overscroll-behavior'], 'none');
+    }
+  });
+  test(`${file}: CSS bounds confirmation and gives its body the shrinkable scroll region`, () => {
+    const html = readHtml(file), component = file === 'components/confirm-dialog.html';
+    const outer = cssRule(html, component ? '.app-confirm-dialog' : 'dialog');
+    assert.equal(outer['max-height'], 'min(760px, calc(100dvh - 28px))');
+    assert.equal(outer.overflow, 'hidden');
+    const open = cssRule(html, component ? '.app-confirm-dialog[open]' : 'dialog[open]');
+    assert.equal(open.display, 'flex'); assert.equal(open['flex-direction'], 'column');
+    assert.equal(cssRule(html, '.app-confirm-header').flex, '0 0 auto');
+    const body = cssRule(html, '.app-confirm-body');
+    assert.equal(body.flex, '1 1 auto'); assert.equal(body['min-height'], '0');
+    assert.equal(body['overflow-y'], 'auto'); assert.equal(body['overscroll-behavior'], 'contain');
+    const markup = html.match(/<dialog class="app-confirm-dialog"[\s\S]*?<\/dialog>/)?.[0];
+    assert.match(markup, /class="app-confirm-header"[\s\S]*?id="appConfirmClose"[\s\S]*?class="app-confirm-body"[\s\S]*?id="appConfirmMessage"[\s\S]*?id="appConfirmCancel"[\s\S]*?id="appConfirmOk"/);
+  });
+}
 if (verifyParity) test('source, readable, root download and decompressed release have identical application runtime', () => {
   const runtime = file => {
     const html = readHtml(file).replace(/\r\n/g, '\n');
@@ -126,6 +161,24 @@ function visible(app){return Array.from(app.visibleReceptionPeople(app.activeSes
 
 for (const file of targets) for (const language of ['ja','en']) {
   const label = `${file} / ${language}`;
+  for (const how of ['cancel', 'close', 'escape', 'backdrop']) test(`${label}: repeated confirmation ${how} preserves records and restores opener focus`, async () => {
+    const app = boot(file, language), session = app.start();
+    session.name = 'Synthetic long session name '.repeat(8);
+    const before = JSON.stringify(app.state), opener = app.node('#endSessionButton');
+    for (let cycle = 0; cycle < 2; cycle++) {
+      opener.focus(); const pending = app.endSession();
+      assert.equal(app.node('#appConfirmDialog').open, true);
+      assert.equal(app.focused, app.node('#appConfirmCancel'));
+      if (how === 'cancel') app.node('#appConfirmCancel').click();
+      if (how === 'close') app.node('#appConfirmClose').click();
+      if (how === 'escape') app.node('#appConfirmDialog').dispatch('cancel');
+      if (how === 'backdrop') app.node('#appConfirmDialog').dispatch('click', {clientX: 0, clientY: 0});
+      await pending;
+      assert.equal(app.node('#appConfirmDialog').open, false);
+      assert.equal(app.focused, opener);
+      assert.equal(JSON.stringify(app.state), before);
+    }
+  });
   test(`${label}: render derives visual and accessible filter state`, () => {
     const app=boot(file,language);app.start();selected(app,'pending');
     for(const filter of ['present','all','pending']) {app.filter(filter);selected(app,filter);app.applyLanguage();selected(app,filter);}
@@ -298,6 +351,11 @@ for (const file of targets) for (const language of ['ja','en']) {
       assert.equal(app.document.querySelectorAll('[data-i18n]').find(el=>el.dataset.i18n==='localBadge').textContent,current==='ja'?'完全ローカル処理':'Fully local processing');
       const help=current==='ja'?'使い方と注意事項':'How to use & notes';
       assert.equal(app.node('#helpButton').getAttribute('aria-label'),help);assert.equal(app.node('#helpButton').title,help);assert.equal(app.node('#helpTitle').textContent,help);
+      const dialogHelp = app.document.querySelectorAll('[data-i18n]').find(el => el.dataset.i18n === 'helpDialogs');
+      assert.ok(dialogHelp, 'Help describes the modal scroll behavior');
+      assert.equal(dialogHelp.textContent, current === 'ja'
+        ? 'ダイアログを開いている間、背景のページはスクロールしません。確認内容が画面に収まらない場合は、本文内をスクロールして操作ボタンへ進めます。上部の閉じるボタンは表示されたままです。'
+        : 'The background page stays still while a dialog is open. If a confirmation is taller than the screen, scroll inside its body to reach the actions. The close button stays visible at the top.');
       app.node('#helpButton').click();assert.equal(app.node('#helpDialog').open,true);app.node('#closeHelpButton').click();assert.equal(app.node('#helpDialog').open,false);
       assert.equal(app.node('#versionBadge').textContent,'v'+JSON.parse(fs.readFileSync(path.join(root,'app.config.json'),'utf8')).version);
       button.click();

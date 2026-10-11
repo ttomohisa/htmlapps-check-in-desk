@@ -12,6 +12,13 @@ All notable changes to this project will be documented in this file.
 - Ignore IME composition-confirmation and auto-repeated Enter so text entry cannot accidentally record attendance or toggle Entry / Exit.
 - Add bilingual regression tests for session transitions, filter state, keyboard guards, normal check-in, Entry / Exit, focus, and immediate Undo across source and standalone downloads.
 
+## [1.0.2] - 2026-10-11
+
+- Prevent background page scrolling while a native dialog is open.
+- Keep the confirmation header visible and allow its message and actions to scroll inside the bounded dialog on short screens.
+- Preserve existing form and Help shells, confirmation results, roster/session state, and local-only processing; document the behavior in Japanese and English.
+- Add source CSS contracts and repeated bilingual confirmation-cancellation regressions.
+
 ## [1.0.1] - 2026-10-07
 
 - Normalize the header language target to EN / JA with matching localized accessible labels and tooltips. Keep local-processing and Help text localized.
