@@ -351,11 +351,7 @@ for (const file of targets) for (const language of ['ja','en']) {
       assert.equal(app.document.querySelectorAll('[data-i18n]').find(el=>el.dataset.i18n==='localBadge').textContent,current==='ja'?'完全ローカル処理':'Fully local processing');
       const help=current==='ja'?'使い方と注意事項':'How to use & notes';
       assert.equal(app.node('#helpButton').getAttribute('aria-label'),help);assert.equal(app.node('#helpButton').title,help);assert.equal(app.node('#helpTitle').textContent,help);
-      const dialogHelp = app.document.querySelectorAll('[data-i18n]').find(el => el.dataset.i18n === 'helpDialogs');
-      assert.ok(dialogHelp, 'Help describes the modal scroll behavior');
-      assert.equal(dialogHelp.textContent, current === 'ja'
-        ? 'ダイアログを開いている間、背景のページはスクロールしません。確認内容が画面に収まらない場合は、本文内をスクロールして操作ボタンへ進めます。上部の閉じるボタンは表示されたままです。'
-        : 'The background page stays still while a dialog is open. If a confirmation is taller than the screen, scroll inside its body to reach the actions. The close button stays visible at the top.');
+      assert.equal(app.document.querySelectorAll('[data-i18n]').some(el => el.dataset.i18n === 'helpDialogs'), false, 'Help excludes layout audit commentary');
       app.node('#helpButton').click();assert.equal(app.node('#helpDialog').open,true);app.node('#closeHelpButton').click();assert.equal(app.node('#helpDialog').open,false);
       assert.equal(app.node('#versionBadge').textContent,'v'+JSON.parse(fs.readFileSync(path.join(root,'app.config.json'),'utf8')).version);
       button.click();
