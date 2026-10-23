@@ -369,3 +369,11 @@ for (const file of targets) for (const language of ['ja','en']) {
     app.node('#appToastAction').click();assert.equal(session.events.length,0,'language toggles retain the reception Undo action');
   });
 }
+
+for (const file of targets) test(`${file}: phone footer hides without removing reception navigation`, () => {
+  const html = readHtml(file);
+  const mobile = html.slice(html.indexOf('@media (max-width: 600px)'), html.indexOf('</style>', html.indexOf('@media (max-width: 600px)')));
+  assert.match(mobile, /footer\s*\{\s*display:\s*none;?\s*\}/);
+  assert.match(mobile, /\.app-mobile-bottom-bar\s*\{[^}]*display:\s*grid/);
+  assert.match(mobile, /body\.has-mobile-bottom-bar\s*\{[^}]*padding-bottom:/);
+});
