@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+- Hide the informational footer in the existing phone layout while preserving functional actions and the wider-screen footer.
+
 - Add Export shown CSV with filtered snapshot rows, displayed count, editable filename, and safe cancel / session replacement behavior.
 - Fix literal `__ungrouped__` group names colliding with No group in reception filters, without changing stored data.
 - Extend bilingual regression coverage to filtered CSV contents, snapshot ownership, cancellation, filenames, legacy exports, and the decompressed self-extract release.

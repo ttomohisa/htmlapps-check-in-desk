@@ -622,6 +622,7 @@
       .data-actions { grid-template-columns: 1fr; }
     }
     @media (max-width: 600px) {
+      footer { display: none; }
       :root { --app-mobile-bottom-bar-height: 72px; }
       body.has-mobile-bottom-bar { padding-bottom: calc(var(--app-mobile-bottom-bar-height) + env(safe-area-inset-bottom)); }
       .main { padding: 14px 12px 24px; }
@@ -1022,7 +1023,7 @@
       'use strict';
 
       const APP_CONFIG = {"$schema":"./schemas/app-config.schema.json","name":"Check-in Desk","nameJa":"受付・出欠チェック","slug":"check-in-desk","version":"1.0.2","description":"A fully local reusable-roster check-in and attendance tracker that runs as a single HTML file.","descriptionJa":"繰り返し使える名簿で受付・出欠・入退室を記録する、完全ローカル処理の単一HTMLツールです。","defaultLanguage":"auto","repository":{"owner":"ttomohisa","name":"htmlapps-check-in-desk"},"build":{"output":"dist/index.html","blockRuntimeNetwork":true,"selfExtract":{"enabled":true,"output":"dist/index.self-extract.html"},"sizeBudget":{"readableWarningMb":5,"selfExtractWarningMb":2}}};
-      const BUILD_MANIFEST = {"schemaVersion":2,"builder":"single-html-app-template/1.2","generatedAtUtc":"2026-10-11T22:21:03.9965143Z","app":{"name":"Check-in Desk","slug":"check-in-desk","version":"1.0.2"},"dependencies":[]};
+      const BUILD_MANIFEST = {"schemaVersion":2,"builder":"single-html-app-template/1.2","generatedAtUtc":"2026-10-23T09:24:54.7893513Z","app":{"name":"Check-in Desk","slug":"check-in-desk","version":"1.0.2"},"dependencies":[]};
       // Asset payloads are Base64 exactly once. The JSON bundle itself is embedded directly.
       const assetBundle = {"schemaVersion":2,"dependencies":{}};
       const blobUrls = new Set();
