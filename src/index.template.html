@@ -74,12 +74,11 @@
       width: 38px;
       height: 38px;
       flex: 0 0 auto;
+      overflow: hidden;
       border-radius: 11px;
-      background: var(--accent);
-      color: #fff;
       box-shadow: var(--shadow-sm);
     }
-    .brand-mark svg { width: 20px; height: 20px; display: block; }
+    .brand-mark svg { width: 100%; height: 100%; display: block; }
     .brand-copy { min-width: 0; }
     .brand-name { display: flex; align-items: center;
       margin: 0;
@@ -100,7 +99,7 @@
       border-radius: 999px;
       color: var(--muted);
       background: var(--surface-muted);
-      font-size: 10px;
+      font-size: 11px;
       font-weight: 650;
       vertical-align: 2px;
     }
@@ -151,6 +150,8 @@
     .icon-button:hover { border-color: var(--line-strong); background: var(--surface-hover); }
     .icon-button:active { transform: translateY(1px); }
     .icon-button svg { width: 18px; height: 18px; display: block; }
+    .dialog-close { display: grid; place-items: center; width: 34px; height: 34px; border: 0; border-radius: 9px; background: transparent; cursor: pointer; }
+    .dialog-close svg { width: 18px; height: 18px; }
     .header-icon-button {
       width: auto;
       height: auto;
@@ -194,13 +195,13 @@
       gap: 7px;
       flex: 0 0 auto;
       margin-top: 3px;
-      padding: 7px 10px;
-      border: 1px solid color-mix(in srgb, var(--accent) 24%, var(--line));
-      border-radius: 999px;
+      padding: 7px 0;
+      border: 0;
+      border-radius: 0;
       color: var(--accent);
-      background: var(--accent-soft);
+      background: transparent;
       font-size: 12px;
-      font-weight: 700;
+      font-weight: 500;
       white-space: nowrap;
     }
     .local-badge svg { width: 15px; height: 15px; display: block; }
@@ -687,12 +688,7 @@
   <header class="app-header">
     <div class="header-inner">
       <div class="brand">
-        <div class="brand-mark" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M5.5 5.5h13v15h-13z"/>
-            <path d="M8.5 3.5v4M15.5 3.5v4M8.5 13l2.2 2.2 4.8-5.4M8.5 18h7"/>
-          </svg>
-        </div>
+        <div class="brand-mark" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="16" fill="#16624F"/><path d="M19 18h26v30H19z" fill="none" stroke="#fff" stroke-width="4" stroke-linejoin="round"/><path d="M25 14v8M39 14v8M25 31l5 5 10-11M25 43h14" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
         <div class="brand-copy">
           <p class="brand-name"><span id="brandName">受付・出欠チェック</span><span class="version-badge" id="versionBadge">v1.0.3</span></p>
           <p class="brand-meta" data-i18n="brandMeta">名簿を繰り返し使える · 完全ローカル処理</p>
@@ -868,20 +864,20 @@
 
   </main>
 
-  <footer><span id="footerName">受付・出欠チェック</span> · MIT License · <span data-i18n="footer">完全内包HTMLとして生成</span></footer>
+  <footer><span id="footerName">受付・出欠チェック</span> · MIT License · <span data-i18n="footer">受付と出欠はブラウザー内で完結</span></footer>
 
   <dialog class="app-form-dialog" id="memberDialog" aria-labelledby="memberDialogTitle">
-    <div class="dialog-header"><h2 id="memberDialogTitle" data-i18n="memberDialogAdd">メンバーを追加</h2><button class="icon-button" id="closeMemberDialog" type="button" data-i18n-aria-label="close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+    <div class="dialog-header"><h2 id="memberDialogTitle" data-i18n="memberDialogAdd">メンバーを追加</h2><button class="dialog-close" id="closeMemberDialog" type="button" data-i18n-aria-label="close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="m6 6 12 12"/><path d="M18 6 6 18"/></svg></button></div>
     <div class="dialog-body"><form class="dialog-form" id="memberForm"><input type="hidden" id="editingMemberId"><div class="field-grid"><label class="field full"><span class="field-label" data-i18n="nameRequired">名前 *</span><input class="field-input" id="memberNameInput" maxlength="120" required autocomplete="off"></label><label class="field"><span class="field-label" data-i18n="memberId">ID</span><input class="field-input" id="memberExternalIdInput" maxlength="80" autocomplete="off"></label><label class="field"><span class="field-label" data-i18n="group">グループ</span><input class="field-input" id="memberGroupInput" maxlength="80" autocomplete="off"></label><label class="field full"><span class="field-label" data-i18n="note">メモ</span><textarea class="field-textarea" id="memberNoteInput" maxlength="500"></textarea></label></div><p class="inline-note hidden" id="memberSnapshotHint" data-i18n="activeRosterSnapshotNote">受付開始後の対象者は開始時点の名簿を保持します。名簿を編集・削除しても進行中または過去の受付記録は変わりません。</p><div class="dialog-actions"><button class="button" id="cancelMemberDialog" type="button" data-i18n="cancel">キャンセル</button><button class="button primary" type="submit" data-i18n="saveMember">保存</button></div></form></div>
   </dialog>
 
   <dialog class="app-form-dialog" id="sessionDialog" aria-labelledby="sessionDialogTitle">
-    <div class="dialog-header"><h2 id="sessionDialogTitle" data-i18n="startReception">新しい受付を開始</h2><button class="icon-button" id="closeSessionDialog" type="button" data-i18n-aria-label="close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+    <div class="dialog-header"><h2 id="sessionDialogTitle" data-i18n="startReception">新しい受付を開始</h2><button class="dialog-close" id="closeSessionDialog" type="button" data-i18n-aria-label="close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="m6 6 12 12"/><path d="M18 6 6 18"/></svg></button></div>
     <div class="dialog-body"><form class="dialog-form" id="sessionForm"><label class="field"><span class="field-label" data-i18n="receptionName">受付名</span><input class="field-input" id="sessionNameInput" maxlength="120" autocomplete="off" required></label><label class="field"><span class="field-label" data-i18n="targetRoster">対象</span><select class="field-select" id="sessionTargetGroup"><option value="" data-i18n="allMembers">全メンバー</option></select></label><fieldset class="field" style="border:0;padding:0;margin:0"><legend class="field-label" data-i18n="mode">受付方法</legend><div class="segmented" id="sessionModePicker"><button class="segment is-active" type="button" data-session-mode="checkin" data-i18n="modeCheckin">受付</button><button class="segment" type="button" data-session-mode="entryexit" data-i18n="modeEntryExit">入退室</button></div><p class="field-help" id="sessionModeHelp" data-i18n="modeCheckinHelp">最初の受付時刻を記録します。</p></fieldset><div class="inline-note" id="sessionTargetPreview"></div><div class="dialog-actions"><button class="button" id="cancelSessionDialog" type="button" data-i18n="cancel">キャンセル</button><button class="button primary" type="submit" data-i18n="startReception">受付を開始</button></div></form></div>
   </dialog>
 
   <dialog class="app-form-dialog" id="receptionExportDialog" aria-labelledby="receptionExportTitle">
-    <div class="dialog-header"><h2 id="receptionExportTitle" data-i18n="exportReceptionTitle">表示中の受付をCSV保存</h2><button class="icon-button" id="closeReceptionExportDialog" type="button" data-i18n-aria-label="close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+    <div class="dialog-header"><h2 id="receptionExportTitle" data-i18n="exportReceptionTitle">表示中の受付をCSV保存</h2><button class="dialog-close" id="closeReceptionExportDialog" type="button" data-i18n-aria-label="close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="m6 6 12 12"/><path d="M18 6 6 18"/></svg></button></div>
     <div class="dialog-body"><form class="dialog-form" id="receptionExportForm">
       <p class="field-help" id="receptionExportSummary"></p>
       <label class="field"><span class="field-label" data-i18n="exportFilename">ファイル名 (.csv)</span><input class="field-input" id="receptionExportFilename" maxlength="160" autocomplete="off"></label>
@@ -890,27 +886,27 @@
   </dialog>
 
   <dialog class="app-form-dialog" id="sessionNameDialog" aria-labelledby="sessionNameDialogTitle">
-    <div class="dialog-header"><h2 id="sessionNameDialogTitle" data-i18n="editSessionName">受付名を編集</h2><button class="icon-button" id="closeSessionNameDialog" type="button" data-i18n-aria-label="close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+    <div class="dialog-header"><h2 id="sessionNameDialogTitle" data-i18n="editSessionName">受付名を編集</h2><button class="dialog-close" id="closeSessionNameDialog" type="button" data-i18n-aria-label="close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="m6 6 12 12"/><path d="M18 6 6 18"/></svg></button></div>
     <div class="dialog-body"><form class="dialog-form" id="sessionNameForm"><input type="hidden" id="editingSessionId"><label class="field"><span class="field-label" data-i18n="receptionName">受付名</span><input class="field-input" id="editingSessionNameInput" maxlength="120" autocomplete="off" required></label><p class="field-help" data-i18n="editSessionNameHelp">受付名だけを変更します。対象者・受付方法・受付記録は変わりません。</p><div class="dialog-actions"><button class="button" id="cancelSessionNameDialog" type="button" data-i18n="cancel">キャンセル</button><button class="button primary" type="submit" data-i18n="saveSessionName">名前を保存</button></div></form></div>
   </dialog>
 
   <dialog class="app-form-dialog" id="walkInDialog" aria-labelledby="walkInDialogTitle">
-    <div class="dialog-header"><h2 id="walkInDialogTitle" data-i18n="addWalkIn">当日参加者を追加</h2><button class="icon-button" id="closeWalkInDialog" type="button" data-i18n-aria-label="close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+    <div class="dialog-header"><h2 id="walkInDialogTitle" data-i18n="addWalkIn">当日参加者を追加</h2><button class="dialog-close" id="closeWalkInDialog" type="button" data-i18n-aria-label="close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="m6 6 12 12"/><path d="M18 6 6 18"/></svg></button></div>
     <div class="dialog-body"><form class="dialog-form" id="walkInForm"><label class="field"><span class="field-label" data-i18n="nameRequired">名前 *</span><input class="field-input" id="walkInNameInput" maxlength="120" required autocomplete="off"></label><label class="checkbox-line"><input type="checkbox" id="walkInAddRoster"><span data-i18n="addToRosterToo">次回以降も使えるよう名簿にも追加する</span></label><div class="dialog-actions"><button class="button" id="cancelWalkInDialog" type="button" data-i18n="cancel">キャンセル</button><button class="button primary" type="submit" data-i18n="add">追加</button></div></form></div>
   </dialog>
 
   <dialog class="app-form-dialog" id="sessionDetailDialog" aria-labelledby="sessionDetailTitle">
-    <div class="dialog-header"><h2 id="sessionDetailTitle">Session</h2><button class="icon-button" id="closeSessionDetailDialog" type="button" data-i18n-aria-label="close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+    <div class="dialog-header"><h2 id="sessionDetailTitle">Session</h2><button class="dialog-close" id="closeSessionDetailDialog" type="button" data-i18n-aria-label="close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="m6 6 12 12"/><path d="M18 6 6 18"/></svg></button></div>
     <div class="dialog-body" id="sessionDetailBody"></div>
   </dialog>
 
   <dialog class="app-form-dialog" id="personHistoryDialog" aria-labelledby="personHistoryTitle">
-    <div class="dialog-header"><h2 id="personHistoryTitle" data-i18n="personHistory">この人の履歴</h2><button class="icon-button" id="closePersonHistoryDialog" type="button" data-i18n-aria-label="close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+    <div class="dialog-header"><h2 id="personHistoryTitle" data-i18n="personHistory">この人の履歴</h2><button class="dialog-close" id="closePersonHistoryDialog" type="button" data-i18n-aria-label="close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="m6 6 12 12"/><path d="M18 6 6 18"/></svg></button></div>
     <div class="dialog-body" id="personHistoryBody"></div>
   </dialog>
 
   <dialog class="app-form-dialog" id="csvPreviewDialog" aria-labelledby="csvPreviewTitle">
-    <div class="dialog-header"><h2 id="csvPreviewTitle" data-i18n="csvPreviewTitle">CSVの読み込み確認</h2><button class="icon-button" id="closeCsvPreviewDialog" type="button" data-i18n-aria-label="close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+    <div class="dialog-header"><h2 id="csvPreviewTitle" data-i18n="csvPreviewTitle">CSVの読み込み確認</h2><button class="dialog-close" id="closeCsvPreviewDialog" type="button" data-i18n-aria-label="close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="m6 6 12 12"/><path d="M18 6 6 18"/></svg></button></div>
     <div class="dialog-body">
       <div class="csv-preview-summary">
         <div class="csv-preview-stat"><strong id="csvPlannedCount">0</strong><span data-i18n="csvPlanned">追加予定</span></div>
@@ -955,7 +951,7 @@
   </dialog>
 
   <dialog class="app-form-dialog" id="csvFormatDialog" aria-labelledby="csvFormatTitle">
-    <div class="dialog-header"><h2 id="csvFormatTitle" data-i18n="csvFormatTitle">名簿CSVの形式</h2><button class="icon-button" id="closeCsvFormatDialog" type="button" data-i18n-aria-label="close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+    <div class="dialog-header"><h2 id="csvFormatTitle" data-i18n="csvFormatTitle">名簿CSVの形式</h2><button class="dialog-close" id="closeCsvFormatDialog" type="button" data-i18n-aria-label="close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="m6 6 12 12"/><path d="M18 6 6 18"/></svg></button></div>
     <div class="dialog-body">
       <p data-i18n="csvFormatIntro">1行目に見出しを入れ、2行目以降に1人ずつ記入します。名前だけ必須です。</p>
       <div class="data-card" style="margin-top:14px">
@@ -978,8 +974,8 @@
   <dialog id="helpDialog" aria-labelledby="helpTitle">
     <div class="dialog-header">
       <h2 id="helpTitle" data-i18n="helpTitle">使い方と注意事項</h2>
-      <button class="icon-button" id="closeHelpButton" type="button" data-i18n-title="close" data-i18n-aria-label="close" title="閉じる" aria-label="閉じる">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><path d="m7 7 10 10M17 7 7 17"/></svg>
+      <button class="dialog-close" id="closeHelpButton" type="button" data-i18n-title="close" data-i18n-aria-label="close" title="閉じる" aria-label="閉じる">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="m6 6 12 12"/><path d="M18 6 6 18"/></svg>
       </button>
     </div>
     <div class="dialog-body">
@@ -1152,7 +1148,7 @@
           backupRestored:'バックアップを復元しました', backupInvalid:'このバックアップを読み込めませんでした。', restoreConfirmTitle:'バックアップを復元', restoreConfirmMessage:'現在の名簿と受付履歴を、選択したバックアップで置き換えます。', resetConfirmTitle:'すべてのデータを削除', resetConfirmMessage:'名簿と受付履歴をこのブラウザーから削除します。この操作は元に戻せません。', resetDone:'すべてのデータを削除しました',
           noHistory:'記録なし', presentMark:'出席', sessionCsv:'この受付をCSV保存', walkInCount:'当日参加', storageWriteFailed:'端末内ストレージへ保存できませんでした。このページを閉じる前にJSONバックアップを保存してください。', storageReadFailed:'保存済みデータを読み込めませんでした。現在のデータを上書きしないため自動保存を停止しています。JSONバックアップから復元するか、すべて削除して再開してください。', storageBlocked:'自動保存は停止中です。JSONバックアップから復元するか、すべて削除してください。', absentMark:'欠席', notTarget:'対象外', sessionDetailPeople:'対象者', sessionDetailEvents:'記録', walkInOnly:'今回のみ',
           exportReception:'表示中をCSV保存 ({count})', exportReceptionTitle:'表示中の受付をCSV保存', exportReceptionSummary:'この画面を開いた時点の表示中 {count} 人を保存します。検索・グループ・受付状態の絞り込みを反映します。', exportFilename:'ファイル名 (.csv)', saveCsv:'CSVを保存',
-          helpLanguage:'表示言語を変更しても、検索条件や保存済みデータはそのまま残ります。',  helpBasicsTitle:'基本の使い方', helpStep1:'名簿にメンバーを登録します。CSVからまとめて追加することもできます。', helpStep2:'受付タブで「新しい受付を開始」を選び、対象と受付方法を決めます。', helpStep3:'名前を検索して受付します。終了後も履歴は残り、次回は同じ名簿をそのまま使えます。', helpReceptionExport:'「表示中をCSV保存」で絞り込み後の対象者だけを保存できます。保存画面を開いた時点の内容を使い、ファイル名を変更できます。受付を終了・切替・復元すると未保存の書き出しは取り消されます。入退室の受付済みは退室した人も含みます。', helpReceptionReset:'受付の開始・再開時は検索とグループ絞り込みを解除し、未受付の一覧に戻ります。', helpReceptionEnter:'検索結果が1人ならEnterで記録できます。日本語などの変換確定中やキーを押し続けたときは記録しません。', helpModesTitle:'受付方法', helpCheckin:'受付: 1人につき1回の参加時刻を記録します。', helpEntryExit:'入退室: 同じ人の入室・退室・再入室を時系列で記録します。', helpWalkIn:'名簿にいない人は当日参加者として追加でき、必要なら名簿にも登録できます。', helpCsv:'名簿のCSV読込の横にある情報アイコンから、列の説明とテンプレートを確認できます。', helpRosterSnapshot:'受付を開始した後に名簿を編集・削除しても、その受付と過去の履歴には開始時点の名前が残ります。', helpPrivacyTitle:'データとプライバシー', helpPrivacyBody:'名簿と受付履歴はこのブラウザー内だけで処理・保存されます。このアプリからサーバーへ送信されません。', helpBackup:'ブラウザーのサイトデータを削除すると名簿や履歴も消える場合があります。継続利用する場合はJSONバックアップを保存してください。', helpNotesTitle:'注意事項', helpNoteLocal:'複数端末間の自動同期はありません。別端末へ移す場合はJSONバックアップを使います。', helpNoteIdentity:'本人確認や入退室のセキュリティゲート用途ではなく、受付・出欠記録のためのツールです。', helpNoteStorage:'重要な履歴はCSVまたはJSONとして保存してください。ブラウザーのストレージは消去されることがあります。', helpOffline:'配布版は単一HTMLで、必要な処理はページ内で完結します。', footer:'完全内包HTMLとして生成'
+          helpLanguage:'表示言語を変更しても、検索条件や保存済みデータはそのまま残ります。',  helpBasicsTitle:'基本の使い方', helpStep1:'名簿にメンバーを登録します。CSVからまとめて追加することもできます。', helpStep2:'受付タブで「新しい受付を開始」を選び、対象と受付方法を決めます。', helpStep3:'名前を検索して受付します。終了後も履歴は残り、次回は同じ名簿をそのまま使えます。', helpReceptionExport:'「表示中をCSV保存」で絞り込み後の対象者だけを保存できます。保存画面を開いた時点の内容を使い、ファイル名を変更できます。受付を終了・切替・復元すると未保存の書き出しは取り消されます。入退室の受付済みは退室した人も含みます。', helpReceptionReset:'受付の開始・再開時は検索とグループ絞り込みを解除し、未受付の一覧に戻ります。', helpReceptionEnter:'検索結果が1人ならEnterで記録できます。日本語などの変換確定中やキーを押し続けたときは記録しません。', helpModesTitle:'受付方法', helpCheckin:'受付: 1人につき1回の参加時刻を記録します。', helpEntryExit:'入退室: 同じ人の入室・退室・再入室を時系列で記録します。', helpWalkIn:'名簿にいない人は当日参加者として追加でき、必要なら名簿にも登録できます。', helpCsv:'名簿のCSV読込の横にある情報アイコンから、列の説明とテンプレートを確認できます。', helpRosterSnapshot:'受付を開始した後に名簿を編集・削除しても、その受付と過去の履歴には開始時点の名前が残ります。', helpPrivacyTitle:'データとプライバシー', helpPrivacyBody:'名簿と受付履歴はこのブラウザー内だけで処理・保存されます。このアプリからサーバーへ送信されません。', helpBackup:'ブラウザーのサイトデータを削除すると名簿や履歴も消える場合があります。継続利用する場合はJSONバックアップを保存してください。', helpNotesTitle:'注意事項', helpNoteLocal:'複数端末間の自動同期はありません。別端末へ移す場合はJSONバックアップを使います。', helpNoteIdentity:'本人確認や入退室のセキュリティゲート用途ではなく、受付・出欠記録のためのツールです。', helpNoteStorage:'重要な履歴はCSVまたはJSONとして保存してください。ブラウザーのストレージは消去されることがあります。', helpOffline:'配布版は単一HTMLで、必要な処理はページ内で完結します。', footer:'受付と出欠はブラウザー内で完結'
         },
         en: {
           brandMeta:'Reusable roster · Fully local processing', helpTitle:'How to use & notes', close:'Close',
@@ -1178,7 +1174,7 @@
           backupRestored:'Backup restored', backupInvalid:'This backup could not be read.', restoreConfirmTitle:'Restore backup', restoreConfirmMessage:'Replace the current roster and history with the selected backup?', resetConfirmTitle:'Delete all data', resetConfirmMessage:'Delete the roster and all check-in history from this browser? This cannot be undone.', resetDone:'All data deleted',
           noHistory:'No records', presentMark:'Present', sessionCsv:'Save this check-in CSV', walkInCount:'Walk-ins', storageWriteFailed:'Could not save to browser storage. Save a JSON backup before closing this page.', storageReadFailed:'Saved data could not be read. Automatic saving is paused to avoid overwriting it. Restore a JSON backup or delete all data to start over.', storageBlocked:'Automatic saving is paused. Restore a JSON backup or delete all data.', absentMark:'Absent', notTarget:'Not target', sessionDetailPeople:'People', sessionDetailEvents:'Records', walkInOnly:'This session only',
           exportReception:'Export shown CSV ({count})', exportReceptionTitle:'Export shown reception', exportReceptionSummary:'Save the {count} people shown when this dialog opened, with the current search, group and attendance filters applied.', exportFilename:'File name (.csv)', saveCsv:'Save CSV',
-          helpLanguage:'Changing the interface language keeps your search and saved data in place.', helpBasicsTitle:'Basics', helpStep1:'Add people to the roster. You can also import many people from CSV.', helpStep2:'On Check-in, choose Start new check-in, then select the target group and mode.', helpStep3:'Search for a name and record attendance. The history remains available and the same roster can be reused next time.', helpReceptionExport:'Export shown CSV saves only the filtered people, using the rows captured when the dialog opens. You can edit the filename. Ending, switching or restoring the session cancels an unsaved export. In Entry / Exit, Checked in includes people who have already exited.', helpReceptionReset:'Starting or reopening a session clears search and group filters and returns to Pending.', helpReceptionEnter:'With one actionable search result, press Enter to record it. Confirming composed text or holding Enter does not record attendance.', helpModesTitle:'Modes', helpCheckin:'Check-in records one attendance time per person.', helpEntryExit:'Entry / Exit records repeated entry, exit, and re-entry events.', helpWalkIn:'People not on the roster can be added as walk-ins, with the option to add them to the reusable roster too.', helpCsv:'Use the info icon next to Import CSV on the Roster screen to view supported columns and save a template.', helpRosterSnapshot:'After a check-in starts, editing or deleting the reusable roster does not change that session or past history.', helpPrivacyTitle:'Data & privacy', helpPrivacyBody:'The roster and check-in history are processed and stored only in this browser. This app does not send them to a server.', helpBackup:'Clearing browser site data can remove the roster and history. Save a JSON backup when you need to keep or move the data.', helpNotesTitle:'Notes', helpNoteLocal:'There is no automatic multi-device sync. Use a JSON backup to move data between devices.', helpNoteIdentity:'This is an attendance and reception tool, not an identity-verification system or security access gate.', helpNoteStorage:'Save important history as CSV or JSON because browser storage can be cleared.', helpOffline:'The distributable is a single HTML file and all required processing stays inside the page.', footer:'Generated as one self-contained HTML file'
+          helpLanguage:'Changing the interface language keeps your search and saved data in place.', helpBasicsTitle:'Basics', helpStep1:'Add people to the roster. You can also import many people from CSV.', helpStep2:'On Check-in, choose Start new check-in, then select the target group and mode.', helpStep3:'Search for a name and record attendance. The history remains available and the same roster can be reused next time.', helpReceptionExport:'Export shown CSV saves only the filtered people, using the rows captured when the dialog opens. You can edit the filename. Ending, switching or restoring the session cancels an unsaved export. In Entry / Exit, Checked in includes people who have already exited.', helpReceptionReset:'Starting or reopening a session clears search and group filters and returns to Pending.', helpReceptionEnter:'With one actionable search result, press Enter to record it. Confirming composed text or holding Enter does not record attendance.', helpModesTitle:'Modes', helpCheckin:'Check-in records one attendance time per person.', helpEntryExit:'Entry / Exit records repeated entry, exit, and re-entry events.', helpWalkIn:'People not on the roster can be added as walk-ins, with the option to add them to the reusable roster too.', helpCsv:'Use the info icon next to Import CSV on the Roster screen to view supported columns and save a template.', helpRosterSnapshot:'After a check-in starts, editing or deleting the reusable roster does not change that session or past history.', helpPrivacyTitle:'Data & privacy', helpPrivacyBody:'The roster and check-in history are processed and stored only in this browser. This app does not send them to a server.', helpBackup:'Clearing browser site data can remove the roster and history. Save a JSON backup when you need to keep or move the data.', helpNotesTitle:'Notes', helpNoteLocal:'There is no automatic multi-device sync. Use a JSON backup to move data between devices.', helpNoteIdentity:'This is an attendance and reception tool, not an identity-verification system or security access gate.', helpNoteStorage:'Save important history as CSV or JSON because browser storage can be cleared.', helpOffline:'The distributable is a single HTML file and all required processing stays inside the page.', footer:'Check-in and attendance stay in the browser'
         }
       };
 
